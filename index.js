@@ -1,12 +1,11 @@
 const express = require("express");
 const axios = require("axios");
-const puppeteer = require("puppeteer");
 
 const app = express();
 app.use(express.json());
 
 // =============================================
-// BURAYA KENDİ BİLGİLERİNİ GİR
+// BİLGİLER
 // =============================================
 const KOLAYGELSIN_KULLANICI = "seyhanbs";
 const KOLAYGELSIN_SIFRE     = "153759";
@@ -15,12 +14,159 @@ const ULTRAMSG_TOKEN        = "7wwhgbrsha8qtzqd";
 const GRUP_ID               = "120363426448176462@g.us";
 // =============================================
 
+let oturumCookie = null;
+
+// Kolay Gelsin'e giriş yap ve cookie al
+async function girisYap() {
+  try {
+    const response = await axios.post(
+      "https://kurumsal.kolaygelsin.com/api/auth/login",
+      { username: KOLAYGELSIN_KULLANICI, password: KOLAYGELSIN_SIFRE },
+      { headers: { "Content-Type": "application/json" } }
+    );
+    const cookies = response.headers["set-cookie"];
+    if (cookies) {
+      oturumCookie = cookies.map(c => c.split(";")[0]).join("; ");
+      console.log("✅ Giriş başarılı!");
+      return true;
+    }
+    // Token tabanlı auth dene
+    if (response.data?.token || response.data?.access_token) {
+      oturumCookie = `Bearer ${response.data.token || response.data.access_token}`;
+      console.log("✅ Token alındı!");
+      return true;
+    }
+  } catch (hata) {
+    console.log("⚠️ API girişi başarısız, form girişi deneniyor...");
+  }
+
+  // Form tabanlı giriş dene
+  try {
+    const formData = new URLSearchParams();
+    formData.append("username", KOLAYGELSIN_KULLANICI);
+    formData.append("password", KOLAYGELSIN_SIFRE);
+
+    const response = await axios.post(
+      "https://kurumsal.kolaygelsin.com/login",
+      formData.toString(),
+      {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        maxRedirects: 5,
+        withCredentials: true,
+      }
+    );
+    const cookies = response.headers["set-cookie"];
+    if (cookies) {
+      oturumCookie = cookies.map(c => c.split(";")[0]).join("; ");
+      console.log("✅ Form girişi başarılı!");
+      return true;
+    }
+  } catch (hata) {
+    console.error("❌ Giriş hatası:", hata.message);
+  }
+  return false;
+}
+
+// Gönderi bilgisi çek
+async function gonderiGetir(gonderiNo) {
+  // Oturum yoksa giriş yap
+  if (!oturumCookie) {
+    const girisOk = await girisYap();
+    if (!girisOk) throw new Error("Kolay Gelsin'e giriş yapılamadı!");
+  }
+
+  // API endpoint'lerini dene
+  const endpointler = [
+    `https://kurumsal.kolaygelsin.com/api/shipments/${gonderiNo}`,
+    `https://kurumsal.kolaygelsin.com/api/shipment/search?q=${gonderiNo}`,
+    `https://kurumsal.kolaygelsin.com/api/v1/shipments?trackingNumber=${gonderiNo}`,
+  ];
+
+  for (const url of endpointler) {
+    try {
+      const res = await axios.get(url, {
+        headers: {
+          "Cookie": oturumCookie,
+          "Authorization": oturumCookie.startsWith("Bearer") ? oturumCookie : undefined,
+        },
+        timeout: 10000,
+      });
+
+      console.log(`📦 API cevabı (${url}):`, JSON.stringify(res.data).substring(0, 500));
+
+      // Cevaptan bilgi çek
+      const data = res.data;
+      let adSoyad = "";
+      let telefon = "";
+
+      // Farklı formatlara göre çek
+      if (data?.receiver?.name) adSoyad = data.receiver.name;
+      else if (data?.aliciAdi) adSoyad = data.aliciAdi;
+      else if (data?.receiverName) adSoyad = data.receiverName;
+      else if (data?.data?.receiverName) adSoyad = data.data.receiverName;
+      else if (Array.isArray(data) && data[0]?.receiverName) adSoyad = data[0].receiverName;
+
+      if (data?.receiver?.phone) telefon = data.receiver.phone;
+      else if (data?.aliciTelefon) telefon = data.aliciTelefon;
+      else if (data?.receiverPhone) telefon = data.receiverPhone;
+      else if (data?.data?.receiverPhone) telefon = data.data.receiverPhone;
+      else if (Array.isArray(data) && data[0]?.receiverPhone) telefon = data[0].receiverPhone;
+
+      if (adSoyad || telefon) {
+        return { adSoyad, telefon };
+      }
+    } catch (hata) {
+      console.log(`⚠️ ${url} başarısız:`, hata.message);
+      if (hata.response?.status === 401) {
+        oturumCookie = null; // Oturum süresi dolmuş
+      }
+    }
+  }
+
+  // Tüm endpointler başarısız — sayfa scraping dene
+  return await sayfadanCek(gonderiNo);
+}
+
+// Son çare: sayfa içeriğinden çek
+async function sayfadanCek(gonderiNo) {
+  try {
+    const res = await axios.get(
+      `https://kurumsal.kolaygelsin.com/pages/shipment-search?q=${gonderiNo}`,
+      {
+        headers: { "Cookie": oturumCookie },
+        timeout: 15000,
+      }
+    );
+
+    const html = res.data;
+    console.log("📄 Sayfa HTML (ilk 1000):", html.substring(0, 1000));
+
+    // Telefon numarası çek
+    const telMatch = html.match(/5\d{9}/g);
+    const telefon = telMatch ? "0" + telMatch[0] : null;
+
+    // İsim çek
+    let adSoyad = null;
+    const isimMatch = html.match(/alıcı[^>]*>([^<]+)/i) ||
+                      html.match(/"receiverName"\s*:\s*"([^"]+)"/i) ||
+                      html.match(/"aliciAdi"\s*:\s*"([^"]+)"/i);
+    if (isimMatch) adSoyad = isimMatch[1].trim();
+
+    return { adSoyad, telefon };
+  } catch (hata) {
+    console.error("❌ Sayfa hatası:", hata.message);
+    return { adSoyad: null, telefon: null };
+  }
+}
+
+// =============================================
+// KUYRUK SİSTEMİ
+// =============================================
 const kuyruk = [];
 let islemDevamEdiyor = false;
 
 function kuyrugaEkle(gonderiNo, mesajId) {
-  const zatenVar = kuyruk.find((k) => k.gonderiNo === gonderiNo);
-  if (zatenVar) return false;
+  if (kuyruk.find(k => k.gonderiNo === gonderiNo)) return false;
   kuyruk.push({ gonderiNo, mesajId });
   return true;
 }
@@ -50,109 +196,13 @@ async function kuyrukIsle() {
       }
     } catch (hata) {
       console.error(`❌ Hata:`, hata.message);
-      await mesajaReplyAt(mesajId, `⚠️ Hata oluştu: ${hata.message}`);
+      await mesajaReplyAt(mesajId, `⚠️ Hata: ${hata.message}`);
     }
 
-    await bekle(2000);
+    await bekle(1000);
   }
 
   islemDevamEdiyor = false;
-}
-
-async function gonderiGetir(gonderiNo) {
-  const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
-
-  try {
-    const page = await browser.newPage();
-
-    // 1. Giriş yap
-    await page.goto("https://kurumsal.kolaygelsin.com/login", {
-      waitUntil: "networkidle2", timeout: 30000,
-    });
-
-    await page.waitForSelector('input[type="text"], input[name="username"]');
-    const inputs = await page.$$('input');
-    await inputs[0].type(KOLAYGELSIN_KULLANICI);
-    await inputs[1].type(KOLAYGELSIN_SIFRE);
-    await page.keyboard.press("Enter");
-    await page.waitForNavigation({ waitUntil: "networkidle2", timeout: 15000 });
-
-    // 2. Gönderi takip sayfasına git
-    await page.goto("https://kurumsal.kolaygelsin.com/pages/shipment-search", {
-      waitUntil: "networkidle2", timeout: 20000,
-    });
-    await bekle(2000);
-
-    // 3. Gönderi numarasını gir
-    const inputlar = await page.$$('input[type="text"]');
-    if (inputlar.length > 0) {
-      await inputlar[0].click({ clickCount: 3 });
-      await inputlar[0].type(gonderiNo);
-    }
-
-    // 4. Filtrele butonuna tıkla
-    await page.evaluate(() => {
-      const butonlar = Array.from(document.querySelectorAll("button, input[type='submit']"));
-      const btn = butonlar.find(b =>
-        b.innerText?.toLowerCase().includes("filtrele") ||
-        b.innerText?.toLowerCase().includes("ara") ||
-        b.value?.toLowerCase().includes("filtrele")
-      );
-      if (btn) btn.click();
-    });
-
-    await bekle(3000);
-
-    // 5. "Ayrıntılar" butonuna tıkla
-    await page.evaluate(() => {
-      const butonlar = Array.from(document.querySelectorAll("button, a"));
-      const btn = butonlar.find(b => b.innerText?.toLowerCase().includes("ayrıntılar"));
-      if (btn) btn.click();
-    });
-
-    await bekle(2000);
-
-    // 6. Açılan popup'tan bilgileri çek
-    const bilgiler = await page.evaluate(() => {
-      const tumMetin = document.body.innerText;
-      console.log("SAYFA:", tumMetin.substring(0, 3000));
-
-      // Ad Soyad — "Alıcı Adı Soyadı / Unvanı" başlığından sonra
-      let adSoyad = "";
-      const satirlar = tumMetin.split("\n").map(s => s.trim()).filter(s => s);
-      for (let i = 0; i < satirlar.length; i++) {
-        if (satirlar[i].toLowerCase().includes("alıcı adı soyadı") ||
-            satirlar[i].toLowerCase().includes("alıcı adı")) {
-          adSoyad = satirlar[i + 1] || "";
-          break;
-        }
-      }
-
-      // Telefon — "Gsm:" formatında
-      let telefon = "";
-      const gsmMatch = tumMetin.match(/Gsm[:\s]+(\d{10,11})/i);
-      if (gsmMatch) {
-        telefon = "0" + gsmMatch[1].replace(/^0/, "");
-      } else {
-        // Normal Türk numarası ara
-        const telMatch = tumMetin.match(/(\+90|0)[\s\-]?(5\d{2})[\s\-]?(\d{3})[\s\-]?(\d{2})[\s\-]?(\d{2})/);
-        if (telMatch) telefon = telMatch[0].replace(/[\s\-]/g, "");
-      }
-
-      return { adSoyad, telefon };
-    });
-
-    console.log("📋 Bulunan bilgiler:", bilgiler);
-    await browser.close();
-    return bilgiler;
-
-  } catch (hata) {
-    await browser.close();
-    throw hata;
-  }
 }
 
 async function mesajaReplyAt(mesajId, mesaj) {
@@ -189,8 +239,11 @@ app.post("/webhook", async (req, res) => {
 });
 
 function bekle(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+// Başlangıçta giriş yap
+girisYap();
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Kurye botu çalışıyor! Port: ${PORT}`));
