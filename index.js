@@ -8,12 +8,11 @@ app.use(express.json());
 // =============================================
 // BURAYA KENDİ BİLGİLERİNİ GİR
 // =============================================
-const KOLAYGELSIN_KULLANICI = "BURAYA_KULLANICI_ADI_YAZ";
-const KOLAYGELSIN_SIFRE     = "BURAYA_SIFRE_YAZ";
-
-const ULTRAMSG_URL          = "https://api.ultramsg.com/instance174194";
-const ULTRAMSG_TOKEN        = "7wwhgbrsha8qtzqd";
-const GRUP_ID               = "BURAYA_GRUP_ID_YAZ"; // örn: 905321234567-1609234567@g.us
+KOLAYGELSIN_KULLANICI = "seyhanbs"
+KOLAYGELSIN_SIFRE     = "153759"
+ULTRAMSG_URL          = "https://api.ultramsg.com/i..."
+ULTRAMSG_TOKEN        = "7wwhgbrsha8qtzqd"
+GRUP_ID               = "120363426448176462@g.us"
 // =============================================
 
 // =============================================
