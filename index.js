@@ -10,9 +10,10 @@ app.use(express.json());
 // =============================================
 const KOLAYGELSIN_KULLANICI = "BURAYA_KULLANICI_ADI_YAZ";
 const KOLAYGELSIN_SIFRE     = "BURAYA_SIFRE_YAZ";
-const GREEN_API_INSTANCE    = "BURAYA_INSTANCE_ID_YAZ";
-const GREEN_API_TOKEN       = "BURAYA_API_TOKEN_YAZ";
-const GRUP_ID               = "BURAYA_GRUP_ID_YAZ";
+
+const ULTRAMSG_URL          = "https://api.ultramsg.com/instance174194";
+const ULTRAMSG_TOKEN        = "7wwhgbrsha8qtzqd";
+const GRUP_ID               = "BURAYA_GRUP_ID_YAZ"; // örn: 905321234567-1609234567@g.us
 // =============================================
 
 // =============================================
@@ -83,20 +84,19 @@ async function gonderiGetir(gonderiNo) {
   try {
     const page = await browser.newPage();
 
-    // 1. Giriş sayfasına git
+    // Giriş yap
     await page.goto("https://kurumsal.kolaygelsin.com/login", {
       waitUntil: "networkidle2",
       timeout: 30000,
     });
 
-    // 2. Kullanıcı adı ve şifre gir
     await page.waitForSelector('input[name="username"], input[placeholder*="kullanıcı"], input[placeholder*="Kullanıcı"], input[type="text"]');
     await page.type('input[name="username"], input[placeholder*="kullanıcı"], input[placeholder*="Kullanıcı"], input[type="text"]', KOLAYGELSIN_KULLANICI);
     await page.type('input[type="password"]', KOLAYGELSIN_SIFRE);
     await page.keyboard.press("Enter");
     await page.waitForNavigation({ waitUntil: "networkidle2", timeout: 15000 });
 
-    // 3. Gönderi Takip sayfasına git
+    // Gönderi Takip sayfasına git
     await page.goto("https://kurumsal.kolaygelsin.com/pages/shipment-search", {
       waitUntil: "networkidle2",
       timeout: 20000,
@@ -104,17 +104,14 @@ async function gonderiGetir(gonderiNo) {
 
     await bekle(2000);
 
-    // 4. "Gönderi Takip Numarası" kutusunu bul ve gönderi numarasını yaz
-    await page.waitForSelector('input', { timeout: 10000 });
-
-    // Sayfadaki ilk input kutusu "Gönderi Takip Numarası"
+    // Gönderi numarasını gir
     const inputlar = await page.$$('input[type="text"], input:not([type="password"])');
     if (inputlar.length > 0) {
       await inputlar[0].click();
       await inputlar[0].type(gonderiNo);
     }
 
-    // 5. Ara butonuna tıkla
+    // Ara butonuna tıkla
     await page.evaluate(() => {
       const butonlar = Array.from(document.querySelectorAll("button"));
       const araButon = butonlar.find(
@@ -128,11 +125,10 @@ async function gonderiGetir(gonderiNo) {
 
     await bekle(3000);
 
-    // 6. Sayfadan müşteri adı ve telefon çek
+    // Bilgileri çek
     const bilgiler = await page.evaluate(() => {
       const tumMetin = document.body.innerText;
 
-      // Telefon numarası bul
       const telRegex = /(\+90|0)[\s\-]?(5\d{2})[\s\-]?(\d{3})[\s\-]?(\d{2})[\s\-]?(\d{2})/g;
       const telefonlar = [];
       let eslesen;
@@ -140,7 +136,6 @@ async function gonderiGetir(gonderiNo) {
         telefonlar.push(eslesen[0].replace(/[\s\-]/g, ""));
       }
 
-      // Ad Soyad bul
       let adSoyad = "";
       const satirlar = tumMetin.split("\n");
       for (let i = 0; i < satirlar.length; i++) {
@@ -161,11 +156,8 @@ async function gonderiGetir(gonderiNo) {
       return {
         telefon: telefonlar[0] || null,
         adSoyad: adSoyad || null,
-        tumMetin: tumMetin.substring(0, 3000),
       };
     });
-
-    console.log("📄 Sayfa içeriği (ilk 500 karakter):", bilgiler.tumMetin.substring(0, 500));
 
     await browser.close();
     return bilgiler;
@@ -177,14 +169,14 @@ async function gonderiGetir(gonderiNo) {
 }
 
 // =============================================
-// GREEN API — MESAJA REPLY AT
+// ULTRAMSG — MESAJA REPLY AT
 // =============================================
 async function mesajaReplyAt(mesajId, mesaj) {
-  const url = `https://api.green-api.com/waInstance${GREEN_API_INSTANCE}/sendMessage/${GREEN_API_TOKEN}`;
-  await axios.post(url, {
-    chatId: GRUP_ID,
-    message: mesaj,
-    quotedMessageId: mesajId,
+  await axios.post(`${ULTRAMSG_URL}/messages/chat`, {
+    token: ULTRAMSG_TOKEN,
+    to: GRUP_ID,
+    body: mesaj,
+    quotedMsgId: mesajId,
   });
 }
 
@@ -197,13 +189,17 @@ app.post("/webhook", async (req, res) => {
   try {
     const body = req.body;
 
-    if (body.typeWebhook !== "incomingMessageReceived") return;
-    if (!body.senderData?.chatId?.includes("@g.us")) return;
+    // Sadece gelen mesajları işle
+    if (body.event_type !== "message_received") return;
 
-    const mesaj = body.messageData?.textMessageData?.textMessage?.trim();
+    const mesaj = body.data?.body?.trim();
     if (!mesaj) return;
 
-    const mesajId = body.idMessage;
+    const mesajId = body.data?.id;
+    const grupId = body.data?.from;
+
+    // Sadece grup mesajlarını işle
+    if (!grupId?.includes("@g.us")) return;
 
     const gonderiNo = mesaj.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
     if (gonderiNo.length < 6 || gonderiNo.length > 25) return;
