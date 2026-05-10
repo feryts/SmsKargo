@@ -16,29 +16,56 @@ async function gonderiGetir(gonderiNo) {
   let browser = null;
   try {
     browser = await puppeteer.connect({
-      browserWSEndpoint: `wss://production-sfo.browserless.io/chromium?token=${BROWSERLESS_KEY}`,
+      browserWSEndpoint: `wss://production-sfo.browserless.io/chromium?token=${BROWSERLESS_KEY}&stealth=true&timeout=120000`,
     });
     const page = await browser.newPage();
-    await page.setDefaultTimeout(25000);
-    await page.goto("https://kurumsal.kolaygelsin.com/login", { waitUntil: "domcontentloaded" });
-    await bekle(1500);
-    const inp = await page.$$("input");
-    if (inp.length >= 2) {
-      await inp[0].type(KOLAYGELSIN_KULLANICI, { delay: 20 });
-      await inp[1].type(KOLAYGELSIN_SIFRE, { delay: 20 });
-      await page.keyboard.press("Enter");
-      await bekle(2500);
-    }
-    await page.goto("https://kurumsal.kolaygelsin.com/pages/shipments/shipmentTrack", { waitUntil: "domcontentloaded" });
-    await bekle(1500);
-    const inp2 = await page.$$('input[type="text"]');
-    if (inp2.length > 0) { await inp2[0].click({ clickCount: 3 }); await inp2[0].type(gonderiNo, { delay: 20 }); }
-    await page.evaluate(() => { const b = Array.from(document.querySelectorAll("button")).find(b => b.innerText?.toLowerCase().includes("filtrele")); if (b) b.click(); });
-    await bekle(2500);
-    await page.evaluate(() => { const s = document.querySelectorAll("tbody tr"); if (s.length > 0) s[0].click(); });
+    await page.setDefaultTimeout(60000);
+
+    await page.goto("https://kurumsal.kolaygelsin.com/login", { waitUntil: "load", timeout: 60000 });
+    await bekle(1000);
+
+    await page.evaluate((kullanici, sifre) => {
+      const inputs = document.querySelectorAll("input");
+      if (inputs[0]) inputs[0].value = kullanici;
+      if (inputs[1]) inputs[1].value = sifre;
+    }, KOLAYGELSIN_KULLANICI, KOLAYGELSIN_SIFRE);
+
+    await page.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll("button")).find(b =>
+        b.innerText?.toLowerCase().includes("giriş") || b.type === "submit"
+      );
+      if (btn) btn.click();
+      else document.querySelector("input[type='password']")?.form?.submit();
+    });
+
+    await bekle(3000);
+
+    await page.goto("https://kurumsal.kolaygelsin.com/pages/shipments/shipmentTrack", { waitUntil: "load", timeout: 60000 });
+    await bekle(1000);
+
+    await page.evaluate((no) => {
+      const inp = document.querySelector('input[type="text"]');
+      if (inp) { inp.value = no; inp.dispatchEvent(new Event("input", { bubbles: true })); inp.dispatchEvent(new Event("change", { bubbles: true })); }
+    }, gonderiNo);
+
+    await page.evaluate(() => {
+      const b = Array.from(document.querySelectorAll("button")).find(b => b.innerText?.toLowerCase().includes("filtrele"));
+      if (b) b.click();
+    });
+    await bekle(3000);
+
+    await page.evaluate(() => {
+      const s = document.querySelectorAll("tbody tr");
+      if (s.length > 0) s[0].click();
+    });
     await bekle(800);
-    await page.evaluate(() => { const b = Array.from(document.querySelectorAll("button, a")).find(b => b.innerText?.toLowerCase().includes("ayrıntılar")); if (b) b.click(); });
+
+    await page.evaluate(() => {
+      const b = Array.from(document.querySelectorAll("button, a")).find(b => b.innerText?.toLowerCase().includes("ayrıntılar"));
+      if (b) b.click();
+    });
     await bekle(1500);
+
     const bilgiler = await page.evaluate(() => {
       const metin = document.body.innerText;
       const satirlar = metin.split("\n").map(s => s.trim()).filter(s => s);
@@ -54,6 +81,7 @@ async function gonderiGetir(gonderiNo) {
       else { const t = (metin.match(/0?5\d{9}/g) || []).find(t => t.replace(/^0/,"").startsWith("5")); if (t) telefon = t.startsWith("0") ? t : "0"+t; }
       return { adSoyad, telefon };
     });
+
     await browser.close();
     return bilgiler;
   } catch (e) {
