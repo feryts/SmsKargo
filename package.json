@@ -1,15 +1,13 @@
 {
   "name": "kurye-whatsapp-bot",
   "version": "1.0.0",
-  "description": "Kolay Gelsin kurye WhatsApp grup botu",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "postinstall": "node -e \"const{execSync}=require('child_process');try{execSync('which chromium-browser || which chromium || which google-chrome',{stdio:'inherit'})}catch(e){console.log('Chrome bulunamadı, puppeteer Chrome kullanılacak')}\""
+    "start": "node index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "axios": "^1.6.0",
-    "puppeteer": "^21.0.0"
+    "puppeteer-core": "^21.0.0"
   }
 }
