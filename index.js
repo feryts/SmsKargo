@@ -12,91 +12,75 @@ const ULTRAMSG_TOKEN        = "7wwhgbrsha8qtzqd";
 const GRUP_ID               = "120363426448176462@g.us";
 const BROWSERLESS_KEY       = "2UUU9ks8ljiUIFPef1975f4001009046682ef4aaa174d1f20";
 
-let browser = null;
-let page = null;
-
-async function tarayiciBaslat() {
+async function gonderiGetir(gonderiNo) {
+  let browser = null;
   try {
     console.log("🔐 Browserless'e bağlanıyor...");
     browser = await puppeteer.connect({
       browserWSEndpoint: `wss://production-sfo.browserless.io?token=${BROWSERLESS_KEY}`,
     });
 
-    page = await browser.newPage();
+    const page = await browser.newPage();
     await page.setDefaultTimeout(30000);
 
-    console.log("🔐 Kolay Gelsin'e giriş yapılıyor...");
-    await page.goto("https://kurumsal.kolaygelsin.com/login", {
-      waitUntil: "networkidle2", timeout: 30000,
-    });
-    await bekle(2000);
+    // Giriş yap
+    console.log("🔐 Giriş yapılıyor...");
+    await page.goto("https://kurumsal.kolaygelsin.com/login", { waitUntil: "domcontentloaded", timeout: 30000 });
+    await bekle(3000);
 
     const inputlar = await page.$$("input");
+    console.log(`📝 ${inputlar.length} input bulundu`);
     if (inputlar.length >= 2) {
       await inputlar[0].type(KOLAYGELSIN_KULLANICI);
       await inputlar[1].type(KOLAYGELSIN_SIFRE);
       await page.keyboard.press("Enter");
-      await page.waitForNavigation({ waitUntil: "networkidle2", timeout: 15000 }).catch(() => {});
+      await bekle(5000);
     }
 
-    console.log("✅ Giriş tamamlandı:", page.url());
-    return true;
-  } catch (e) {
-    console.error("❌ Tarayıcı hatası:", e.message);
-    browser = null; page = null;
-    return false;
-  }
-}
+    console.log("✅ Giriş sonrası URL:", page.url());
 
-async function gonderiGetir(gonderiNo) {
-  if (!browser || !page) {
-    const ok = await tarayiciBaslat();
-    if (!ok) throw new Error("Tarayıcı başlatılamadı");
-  }
-
-  try {
-    if (page.url().includes("login")) {
-      browser = null; page = null;
-      await tarayiciBaslat();
-    }
-
+    // Gönderi takip sayfasına git
     await page.goto("https://kurumsal.kolaygelsin.com/pages/shipments/shipmentTrack", {
-      waitUntil: "networkidle2", timeout: 20000,
+      waitUntil: "domcontentloaded", timeout: 20000,
     });
-    await bekle(2000);
+    await bekle(3000);
 
-    const inputlar = await page.$$('input[type="text"]');
-    if (inputlar.length > 0) {
-      await inputlar[0].click({ clickCount: 3 });
-      await inputlar[0].type(gonderiNo);
+    // Gönderi numarasını gir
+    const inputlar2 = await page.$$('input[type="text"]');
+    if (inputlar2.length > 0) {
+      await inputlar2[0].click({ clickCount: 3 });
+      await inputlar2[0].type(gonderiNo);
     }
 
+    // Filtrele butonuna tıkla
     await page.evaluate(() => {
       const b = Array.from(document.querySelectorAll("button")).find(b =>
         b.innerText?.toLowerCase().includes("filtrele") || b.innerText?.toLowerCase().includes("ara")
       );
       if (b) b.click();
     });
-    await bekle(3000);
+    await bekle(4000);
 
+    // Satıra tıkla
     await page.evaluate(() => {
       const s = document.querySelectorAll("tbody tr");
       if (s.length > 0) s[0].click();
     });
-    await bekle(1000);
+    await bekle(1500);
 
+    // Ayrıntılar butonuna tıkla
     await page.evaluate(() => {
       const b = Array.from(document.querySelectorAll("button, a")).find(b =>
         b.innerText?.toLowerCase().includes("ayrıntılar") || b.innerText?.toLowerCase().includes("detay")
       );
       if (b) b.click();
     });
-    await bekle(2000);
+    await bekle(2500);
 
+    // Bilgileri çek
     const bilgiler = await page.evaluate(() => {
       const metin = document.body.innerText;
       const satirlar = metin.split("\n").map(s => s.trim()).filter(s => s);
-
       let adSoyad = "";
       for (let i = 0; i < satirlar.length; i++) {
         if (satirlar[i].toLowerCase().includes("alıcı adı soyadı") ||
@@ -105,7 +89,6 @@ async function gonderiGetir(gonderiNo) {
           break;
         }
       }
-
       let telefon = "";
       const gsmMatch = metin.match(/Gsm[:\s]+(\d{10,11})/i);
       if (gsmMatch) {
@@ -114,15 +97,15 @@ async function gonderiGetir(gonderiNo) {
         const t = metin.match(/0?5\d{9}/);
         if (t) telefon = t[0].startsWith("0") ? t[0] : "0" + t[0];
       }
-
+      console.log("Sayfa metni:", metin.substring(0, 300));
       return { adSoyad, telefon };
     });
 
     console.log("✅ Bilgiler:", bilgiler);
+    await browser.close();
     return bilgiler;
   } catch (e) {
-    console.error("❌ Hata:", e.message);
-    browser = null; page = null;
+    if (browser) await browser.close().catch(() => {});
     throw e;
   }
 }
@@ -155,6 +138,7 @@ async function kuyrukIsle() {
         await mesajaReplyAt(mesajId, `❌ *${gonderiNo}* için bilgi bulunamadı.`);
       }
     } catch (e) {
+      console.error("Hata:", e.message);
       await mesajaReplyAt(mesajId, `⚠️ Hata: ${e.message}`);
     }
     await bekle(1000);
@@ -164,10 +148,7 @@ async function kuyrukIsle() {
 
 async function mesajaReplyAt(mesajId, mesaj) {
   await axios.post(`${ULTRAMSG_URL}/messages/chat`, {
-    token: ULTRAMSG_TOKEN,
-    to: GRUP_ID,
-    body: mesaj,
-    quotedMsgId: mesajId,
+    token: ULTRAMSG_TOKEN, to: GRUP_ID, body: mesaj, quotedMsgId: mesajId,
   });
 }
 
@@ -188,14 +169,10 @@ app.post("/webhook", async (req, res) => {
       await mesajaReplyAt(mesajId, `⏳ Kuyruğa alındı. Sıra: *${kuyruk.length}*`);
     }
     kuyrukIsle();
-  } catch (e) {
-    console.error("Webhook hatası:", e.message);
-  }
+  } catch (e) { console.error("Webhook hatası:", e.message); }
 });
 
 function bekle(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-tarayiciBaslat();
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`🚀 Bot çalışıyor! Port: ${PORT}`));
