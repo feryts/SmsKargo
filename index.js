@@ -16,93 +16,48 @@ async function gonderiGetir(gonderiNo) {
   let browser = null;
   try {
     browser = await puppeteer.connect({
-      browserWSEndpoint: `wss://production-sfo.browserless.io?token=${BROWSERLESS_KEY}&timeout=60000`,
+      browserWSEndpoint: `wss://production-sfo.browserless.io?token=${BROWSERLESS_KEY}&timeout=120000`,
     });
-
     const page = await browser.newPage();
-    await page.setDefaultTimeout(20000);
-
-    // Giriş yap
-    await page.goto("https://kurumsal.kolaygelsin.com/login", { waitUntil: "domcontentloaded", timeout: 20000 });
+    await page.setDefaultTimeout(25000);
+    await page.goto("https://kurumsal.kolaygelsin.com/login", { waitUntil: "domcontentloaded" });
     await bekle(1500);
-
-    const inputlar = await page.$$("input");
-    if (inputlar.length >= 2) {
-      await inputlar[0].type(KOLAYGELSIN_KULLANICI, { delay: 30 });
-      await inputlar[1].type(KOLAYGELSIN_SIFRE, { delay: 30 });
+    const inp = await page.$$("input");
+    if (inp.length >= 2) {
+      await inp[0].type(KOLAYGELSIN_KULLANICI, { delay: 20 });
+      await inp[1].type(KOLAYGELSIN_SIFRE, { delay: 20 });
       await page.keyboard.press("Enter");
       await bekle(2500);
     }
-
-    // Gönderi takip sayfasına git
-    await page.goto("https://kurumsal.kolaygelsin.com/pages/shipments/shipmentTrack", {
-      waitUntil: "domcontentloaded", timeout: 20000,
-    });
+    await page.goto("https://kurumsal.kolaygelsin.com/pages/shipments/shipmentTrack", { waitUntil: "domcontentloaded" });
     await bekle(1500);
-
-    // Gönderi numarasını gir
-    const inputlar2 = await page.$$('input[type="text"]');
-    if (inputlar2.length > 0) {
-      await inputlar2[0].click({ clickCount: 3 });
-      await inputlar2[0].type(gonderiNo, { delay: 30 });
-    }
-
-    // Filtrele
-    await page.evaluate(() => {
-      const b = Array.from(document.querySelectorAll("button")).find(b =>
-        b.innerText?.toLowerCase().includes("filtrele") || b.innerText?.toLowerCase().includes("ara")
-      );
-      if (b) b.click();
-    });
+    const inp2 = await page.$$('input[type="text"]');
+    if (inp2.length > 0) { await inp2[0].click({ clickCount: 3 }); await inp2[0].type(gonderiNo, { delay: 20 }); }
+    await page.evaluate(() => { const b = Array.from(document.querySelectorAll("button")).find(b => b.innerText?.toLowerCase().includes("filtrele")); if (b) b.click(); });
     await bekle(2500);
-
-    // Satıra tıkla
-    await page.evaluate(() => {
-      const s = document.querySelectorAll("tbody tr");
-      if (s.length > 0) s[0].click();
-    });
+    await page.evaluate(() => { const s = document.querySelectorAll("tbody tr"); if (s.length > 0) s[0].click(); });
     await bekle(800);
-
-    // Ayrıntılar
-    await page.evaluate(() => {
-      const b = Array.from(document.querySelectorAll("button, a")).find(b =>
-        b.innerText?.toLowerCase().includes("ayrıntılar") || b.innerText?.toLowerCase().includes("detay")
-      );
-      if (b) b.click();
-    });
+    await page.evaluate(() => { const b = Array.from(document.querySelectorAll("button, a")).find(b => b.innerText?.toLowerCase().includes("ayrıntılar")); if (b) b.click(); });
     await bekle(1500);
-
-    // Bilgileri çek
     const bilgiler = await page.evaluate(() => {
       const metin = document.body.innerText;
       const satirlar = metin.split("\n").map(s => s.trim()).filter(s => s);
-
       let adSoyad = "";
       for (let i = 0; i < satirlar.length; i++) {
-        if (satirlar[i].toLowerCase().includes("alıcı adı soyadı") ||
-            satirlar[i].toLowerCase().includes("alıcı adı")) {
-          adSoyad = satirlar[i + 1] || "";
-          break;
+        if (satirlar[i].toLowerCase().includes("alıcı adı soyadı") || satirlar[i].toLowerCase().includes("alıcı adı")) {
+          adSoyad = satirlar[i + 1] || ""; break;
         }
       }
-
       let telefon = "";
       const gsmMatch = metin.match(/Gsm[:\s]+(5\d{9})/i);
-      if (gsmMatch) {
-        telefon = "0" + gsmMatch[1];
-      } else {
-        const tumTelefon = metin.match(/0?5\d{9}/g) || [];
-        const gsm = tumTelefon.find(t => t.replace(/^0/, "").startsWith("5"));
-        if (gsm) telefon = gsm.startsWith("0") ? gsm : "0" + gsm;
-      }
-
+      if (gsmMatch) { telefon = "0" + gsmMatch[1]; }
+      else { const t = (metin.match(/0?5\d{9}/g) || []).find(t => t.replace(/^0/,"").startsWith("5")); if (t) telefon = t.startsWith("0") ? t : "0"+t; }
       return { adSoyad, telefon };
     });
-
     await browser.close();
     return bilgiler;
   } catch (e) {
-    if (browser) await browser.close().catch(() => {});
+    if (browser) await browser.close().catch(()=>{});
     throw e;
   }
 }
@@ -122,15 +77,11 @@ async function kuyrukIsle() {
   while (kuyruk.length > 0) {
     const { gonderiNo, mesajId } = kuyruk.shift();
     try {
-      const kalanMesaj = kuyruk.length > 0 ? ` (Sirada ${kuyruk.length} sorgu daha var)` : "";
-      await mesajaReplyAt(mesajId, `Sorgulanıyor...${kalanMesaj}`);
+      const kalan = kuyruk.length > 0 ? ` (Sirada ${kuyruk.length} sorgu var)` : "";
+      await mesajaReplyAt(mesajId, `Sorgulanıyor...${kalan}`);
       const bilgi = await gonderiGetir(gonderiNo);
       if (bilgi.adSoyad || bilgi.telefon) {
-        await mesajaReplyAt(mesajId,
-          `Gonderi No: ${gonderiNo}\n` +
-          `Ad Soyad: ${bilgi.adSoyad || "Bulunamadi"}\n` +
-          `Telefon: ${bilgi.telefon || "Bulunamadi"}`
-        );
+        await mesajaReplyAt(mesajId, `Gonderi No: ${gonderiNo}\nAd Soyad: ${bilgi.adSoyad || "Bulunamadi"}\nTelefon: ${bilgi.telefon || "Bulunamadi"}`);
       } else {
         await mesajaReplyAt(mesajId, `${gonderiNo} icin bilgi bulunamadi.`);
       }
@@ -144,9 +95,7 @@ async function kuyrukIsle() {
 }
 
 async function mesajaReplyAt(mesajId, mesaj) {
-  await axios.post(`${ULTRAMSG_URL}/messages/chat`, {
-    token: ULTRAMSG_TOKEN, to: GRUP_ID, body: mesaj, quotedMsgId: mesajId,
-  });
+  await axios.post(`${ULTRAMSG_URL}/messages/chat`, { token: ULTRAMSG_TOKEN, to: GRUP_ID, body: mesaj, quotedMsgId: mesajId });
 }
 
 app.post("/webhook", async (req, res) => {
@@ -162,9 +111,7 @@ app.post("/webhook", async (req, res) => {
     const gonderiNo = mesaj.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
     if (gonderiNo.length < 6 || gonderiNo.length > 25) return;
     const eklendi = kuyrugaEkle(gonderiNo, mesajId);
-    if (eklendi && kuyruk.length > 1) {
-      await mesajaReplyAt(mesajId, `Siraya alindi. Sira: ${kuyruk.length}`);
-    }
+    if (eklendi && kuyruk.length > 1) { await mesajaReplyAt(mesajId, `Siraya alindi. Sira: ${kuyruk.length}`); }
     kuyrukIsle();
   } catch (e) { console.error("Webhook hatasi:", e.message); }
 });
