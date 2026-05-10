@@ -15,93 +15,60 @@ const BROWSERLESS_KEY       = "2UUU9ks8ljiUIFPef1975f4001009046682ef4aaa174d1f20
 async function gonderiGetir(gonderiNo) {
   let browser = null;
   try {
-    console.log("🔐 Browserless'e bağlanıyor...");
     browser = await puppeteer.connect({
       browserWSEndpoint: `wss://production-sfo.browserless.io?token=${BROWSERLESS_KEY}`,
     });
-
     const page = await browser.newPage();
     await page.setDefaultTimeout(30000);
-
-    // Giriş yap
-    console.log("🔐 Giriş yapılıyor...");
     await page.goto("https://kurumsal.kolaygelsin.com/login", { waitUntil: "domcontentloaded", timeout: 30000 });
-    await bekle(3000);
-
+    await bekle(2000);
     const inputlar = await page.$$("input");
-    console.log(`📝 ${inputlar.length} input bulundu`);
     if (inputlar.length >= 2) {
       await inputlar[0].type(KOLAYGELSIN_KULLANICI);
       await inputlar[1].type(KOLAYGELSIN_SIFRE);
       await page.keyboard.press("Enter");
-      await bekle(5000);
+      await bekle(3000);
     }
-
-    console.log("✅ Giriş sonrası URL:", page.url());
-
-    // Gönderi takip sayfasına git
-    await page.goto("https://kurumsal.kolaygelsin.com/pages/shipments/shipmentTrack", {
-      waitUntil: "domcontentloaded", timeout: 20000,
-    });
-    await bekle(3000);
-
-    // Gönderi numarasını gir
+    await page.goto("https://kurumsal.kolaygelsin.com/pages/shipments/shipmentTrack", { waitUntil: "domcontentloaded", timeout: 20000 });
+    await bekle(2000);
     const inputlar2 = await page.$$('input[type="text"]');
     if (inputlar2.length > 0) {
       await inputlar2[0].click({ clickCount: 3 });
       await inputlar2[0].type(gonderiNo);
     }
-
-    // Filtrele butonuna tıkla
     await page.evaluate(() => {
-      const b = Array.from(document.querySelectorAll("button")).find(b =>
-        b.innerText?.toLowerCase().includes("filtrele") || b.innerText?.toLowerCase().includes("ara")
-      );
+      const b = Array.from(document.querySelectorAll("button")).find(b => b.innerText?.toLowerCase().includes("filtrele") || b.innerText?.toLowerCase().includes("ara"));
       if (b) b.click();
     });
-    await bekle(4000);
-
-    // Satıra tıkla
+    await bekle(3000);
+    await page.evaluate(() => { const s = document.querySelectorAll("tbody tr"); if (s.length > 0) s[0].click(); });
+    await bekle(1000);
     await page.evaluate(() => {
-      const s = document.querySelectorAll("tbody tr");
-      if (s.length > 0) s[0].click();
-    });
-    await bekle(1500);
-
-    // Ayrıntılar butonuna tıkla
-    await page.evaluate(() => {
-      const b = Array.from(document.querySelectorAll("button, a")).find(b =>
-        b.innerText?.toLowerCase().includes("ayrıntılar") || b.innerText?.toLowerCase().includes("detay")
-      );
+      const b = Array.from(document.querySelectorAll("button, a")).find(b => b.innerText?.toLowerCase().includes("ayrıntılar") || b.innerText?.toLowerCase().includes("detay"));
       if (b) b.click();
     });
-    await bekle(2500);
-
-    // Bilgileri çek
+    await bekle(2000);
     const bilgiler = await page.evaluate(() => {
       const metin = document.body.innerText;
       const satirlar = metin.split("\n").map(s => s.trim()).filter(s => s);
       let adSoyad = "";
       for (let i = 0; i < satirlar.length; i++) {
-        if (satirlar[i].toLowerCase().includes("alıcı adı soyadı") ||
-            satirlar[i].toLowerCase().includes("alıcı adı")) {
+        if (satirlar[i].toLowerCase().includes("alıcı adı soyadı") || satirlar[i].toLowerCase().includes("alıcı adı")) {
           adSoyad = satirlar[i + 1] || "";
           break;
         }
       }
       let telefon = "";
-      const gsmMatch = metin.match(/Gsm[:\s]+(\d{10,11})/i);
+      const gsmMatch = metin.match(/Gsm[:\s]+(5\d{9})/i);
       if (gsmMatch) {
-        telefon = "0" + gsmMatch[1].replace(/^0/, "");
+        telefon = "0" + gsmMatch[1];
       } else {
-        const t = metin.match(/0?5\d{9}/);
-        if (t) telefon = t[0].startsWith("0") ? t[0] : "0" + t[0];
+        const tumTelefon = metin.match(/0?5\d{9}/g) || [];
+        const gsm = tumTelefon.find(t => t.replace(/^0/, "").startsWith("5"));
+        if (gsm) telefon = gsm.startsWith("0") ? gsm : "0" + gsm;
       }
-      console.log("Sayfa metni:", metin.substring(0, 300));
       return { adSoyad, telefon };
     });
-
-    console.log("✅ Bilgiler:", bilgiler);
     await browser.close();
     return bilgiler;
   } catch (e) {
@@ -125,23 +92,18 @@ async function kuyrukIsle() {
   while (kuyruk.length > 0) {
     const { gonderiNo, mesajId } = kuyruk.shift();
     try {
-      const kalanMesaj = kuyruk.length > 0 ? `_(Sırada ${kuyruk.length} sorgu daha var)_` : "";
-      await mesajaReplyAt(mesajId, `🔍 Sorgulanıyor... ${kalanMesaj}`);
+      const kalanMesaj = kuyruk.length > 0 ? `(Sirada ${kuyruk.length} sorgu daha var)` : "";
+      await mesajaReplyAt(mesajId, `Sorgulanıyor... ${kalanMesaj}`);
       const bilgi = await gonderiGetir(gonderiNo);
       if (bilgi.adSoyad || bilgi.telefon) {
-        await mesajaReplyAt(mesajId,
-          `📦 *Gönderi No:* ${gonderiNo}\n` +
-          `👤 *Ad Soyad:* ${bilgi.adSoyad || "Bulunamadı"}\n` +
-          `📞 *Telefon:* ${bilgi.telefon || "Bulunamadı"}`
-        );
+        await mesajaReplyAt(mesajId, `Gonderi No: ${gonderiNo}\nAd Soyad: ${bilgi.adSoyad || "Bulunamadi"}\nTelefon: ${bilgi.telefon || "Bulunamadi"}`);
       } else {
-        await mesajaReplyAt(mesajId, `❌ *${gonderiNo}* için bilgi bulunamadı.`);
+        await mesajaReplyAt(mesajId, `${gonderiNo} icin bilgi bulunamadi.`);
       }
     } catch (e) {
-      console.error("Hata:", e.message);
-      await mesajaReplyAt(mesajId, `⚠️ Hata: ${e.message}`);
+      await mesajaReplyAt(mesajId, `Hata: ${e.message}`);
     }
-    await bekle(1000);
+    await bekle(500);
   }
   islemDevamEdiyor = false;
 }
@@ -166,13 +128,13 @@ app.post("/webhook", async (req, res) => {
     if (gonderiNo.length < 6 || gonderiNo.length > 25) return;
     const eklendi = kuyrugaEkle(gonderiNo, mesajId);
     if (eklendi && kuyruk.length > 1) {
-      await mesajaReplyAt(mesajId, `⏳ Kuyruğa alındı. Sıra: *${kuyruk.length}*`);
+      await mesajaReplyAt(mesajId, `Siraya alindi. Sira: ${kuyruk.length}`);
     }
     kuyrukIsle();
-  } catch (e) { console.error("Webhook hatası:", e.message); }
+  } catch (e) { console.error("Webhook hatasi:", e.message); }
 });
 
 function bekle(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`🚀 Bot çalışıyor! Port: ${PORT}`));
+app.listen(PORT, () => console.log(`Bot calisiyor! Port: ${PORT}`));
