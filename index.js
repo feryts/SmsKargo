@@ -16,7 +16,7 @@ async function gonderiGetir(gonderiNo) {
   let browser = null;
   try {
     browser = await puppeteer.connect({
-      browserWSEndpoint: `wss://production-sfo.browserless.io?token=${BROWSERLESS_KEY}&timeout=120000`,
+      browserWSEndpoint: `wss://production-sfo.browserless.io/chromium?token=${BROWSERLESS_KEY}`,
     });
     const page = await browser.newPage();
     await page.setDefaultTimeout(25000);
