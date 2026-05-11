@@ -8,28 +8,31 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Sorgula">
 <link rel="manifest" href="/manifest.json">
-<title>Gonderi Sorgula</title>
+<title>Kolay Gelsin Gonderi Sorgula</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   [data-theme="dark"] {
     --bg: #0a0c14; --card: #13161f; --border: #1e2130; --text: #f0f0f0; --text2: #666;
-    --accent: #4f8ef7; --accent2: #3d7ee8; --btn-bg: #1a1d2e; --success: #4caf50;
+    --accent: #5cb85c; --accent2: #4cae4c; --btn-bg: #1a1d2e; --success: #4caf50;
     --error-bg: #1a0f0f; --error-border: #3d1a20; --error-text: #e05555;
     --call-bg: #0f1a0f; --call-border: #1e3d1e; --shadow: rgba(0,0,0,0.4);
+    --logo-opacity: 0.04;
   }
   [data-theme="light"] {
-    --bg: #eef1f8; --card: #ffffff; --border: #e0e4f0; --text: #1a1d2e; --text2: #999;
-    --accent: #2d6ef0; --accent2: #1a5ee0; --btn-bg: #e8ecf8; --success: #2e7d32;
+    --bg: #f0f7f0; --card: #ffffff; --border: #d0e8d0; --text: #1a2e1a; --text2: #999;
+    --accent: #5cb85c; --accent2: #4cae4c; --btn-bg: #e8f5e8; --success: #2e7d32;
     --error-bg: #fff0f0; --error-border: #ffcdd2; --error-text: #c62828;
-    --call-bg: #e8f5e9; --call-border: #a5d6a7; --shadow: rgba(0,0,0,0.1);
+    --call-bg: #e8f5e9; --call-border: #a5d6a7; --shadow: rgba(0,0,0,0.08);
+    --logo-opacity: 0.06;
   }
   [data-theme="colorful"] {
     --bg: #0d0720; --card: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.12);
-    --text: #ffffff; --text2: #9090bb; --accent: #a78bfa; --accent2: #8b5cf6;
-    --btn-bg: rgba(167,139,250,0.15); --success: #34d399;
+    --text: #ffffff; --text2: #9090bb; --accent: #5cb85c; --accent2: #4cae4c;
+    --btn-bg: rgba(92,184,92,0.15); --success: #34d399;
     --error-bg: rgba(255,0,0,0.08); --error-border: rgba(255,80,80,0.3); --error-text: #ff7070;
     --call-bg: rgba(52,211,153,0.08); --call-border: rgba(52,211,153,0.3); --shadow: rgba(0,0,0,0.5);
+    --logo-opacity: 0.05;
   }
 
   body {
@@ -43,31 +46,56 @@
     justify-content: center;
     padding: 24px 20px;
     transition: background 0.3s, color 0.3s;
+    position: relative;
+    overflow: hidden;
   }
   [data-theme="colorful"] body {
     background: radial-gradient(ellipse at top, #1a0533 0%, #0d0720 60%);
   }
 
-  .container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
+  /* ARKA PLAN LOGO */
+  .bg-logo {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 500px;
+    opacity: var(--logo-opacity);
+    pointer-events: none;
+    z-index: 0;
+    filter: grayscale(30%);
+  }
+
+  .container {
+    width: 100%; max-width: 400px;
+    display: flex; flex-direction: column; gap: 12px;
+    position: relative; z-index: 1;
+  }
 
   .header-badge {
-    text-align: center;
-    font-size: 10px;
-    color: var(--text2);
-    opacity: 0.6;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 4px 0;
-    font-weight: 600;
+    text-align: center; font-size: 10px; color: var(--text2);
+    opacity: 0.6; letter-spacing: 2px; text-transform: uppercase;
+    padding: 4px 0; font-weight: 600;
   }
 
   .logo { text-align: center; padding: 4px 0; }
-  .logo h1 { font-size: 18px; font-weight: 700; letter-spacing: 2px; color: var(--text); opacity: 0.9; }
+  .logo .kg-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 3px;
+    color: #5cb85c; text-transform: uppercase; margin-bottom: 4px;
+  }
+  .logo h1 { font-size: 18px; font-weight: 700; letter-spacing: 2px; color: #5cb85c; }
   .logo p { font-size: 11px; color: var(--text2); margin-top: 4px; letter-spacing: 0.5px; }
 
-  .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 4px 24px var(--shadow); }
+  .card {
+    background: var(--card); border-radius: 20px; padding: 20px;
+    border: 1px solid var(--border); box-shadow: 0 4px 24px var(--shadow);
+  }
 
-  label { display: block; font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+  label {
+    display: block; font-size: 10px; font-weight: 700; color: #5cb85c;
+    text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;
+  }
 
   .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
   input {
@@ -76,55 +104,59 @@
     outline: none; transition: border-color 0.2s, box-shadow 0.2s;
   }
   [data-theme="colorful"] input { background: rgba(0,0,0,0.3); }
-  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,142,247,0.1); }
+  input:focus { border-color: #5cb85c; box-shadow: 0 0 0 3px rgba(92,184,92,0.15); }
   input::placeholder { color: var(--text2); font-size: 13px; opacity: 0.6; }
 
   .paste-btn {
     background: var(--btn-bg); border: 1.5px solid var(--border); border-radius: 12px;
-    padding: 13px 14px; color: var(--accent); font-size: 12px; font-weight: 700;
+    padding: 13px 14px; color: #5cb85c; font-size: 12px; font-weight: 700;
     cursor: pointer; white-space: nowrap; transition: all 0.2s;
   }
   .paste-btn:active { transform: scale(0.95); opacity: 0.8; }
 
   .sorgu-btn {
-    width: 100%; background: var(--accent); color: #fff; border: none;
+    width: 100%; background: #5cb85c; color: #fff; border: none;
     border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700;
     cursor: pointer; transition: all 0.2s;
-    box-shadow: 0 4px 16px rgba(79,142,247,0.3);
+    box-shadow: 0 4px 16px rgba(92,184,92,0.4);
   }
-  .sorgu-btn:active { transform: scale(0.98); }
+  .sorgu-btn:active { transform: scale(0.98); background: #4cae4c; }
   .sorgu-btn:disabled { background: var(--border); color: var(--text2); cursor: not-allowed; box-shadow: none; }
 
-  .result { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 4px 24px var(--shadow); display: none; }
+  .result {
+    background: var(--card); border-radius: 20px; padding: 20px;
+    border: 1px solid var(--border); box-shadow: 0 4px 24px var(--shadow); display: none;
+  }
   .result.show { display: block; }
 
   .result-row { padding: 12px 0; border-bottom: 1px solid var(--border); }
   .result-row:last-child { border-bottom: none; padding-bottom: 0; }
   .result-row:first-child { padding-top: 0; }
-  .result-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 5px; }
+  .result-label { font-size: 10px; color: #5cb85c; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 5px; }
   .result-value { font-size: 17px; font-weight: 600; color: var(--text); }
   .result-value.name { font-size: 19px; font-weight: 700; }
 
   .phone-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .phone-info { display: flex; flex-direction: column; gap: 2px; }
-  .phone-number { font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+  .phone-number { font-size: 20px; font-weight: 700; color: #5cb85c; letter-spacing: 1px; }
   .phone-last4 { font-size: 11px; color: var(--text2); font-weight: 500; }
   .phone-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
   .action-btn {
-    width: 42px; height: 42px; border-radius: 12px; border: 1.5px solid var(--border);
+    width: 42px; height: 42px; border-radius: 12px;
+    border: 1.5px solid rgba(92,184,92,0.3);
     display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all 0.2s; background: var(--btn-bg);
-    text-decoration: none;
+    cursor: pointer; transition: all 0.2s;
+    background: rgba(92,184,92,0.08); text-decoration: none;
   }
   .action-btn:active { transform: scale(0.88); }
-  .action-btn.copy { color: var(--accent); font-size: 16px; font-weight: 700; }
+  .action-btn.copy { color: #5cb85c; font-size: 16px; font-weight: 700; }
   .action-btn.copy.copied { color: var(--success); border-color: var(--success); }
-  .action-btn.call { color: var(--success); border-color: var(--call-border); background: var(--call-bg); }
+  .action-btn.call { color: #5cb85c; }
 
   .loading { display: none; text-align: center; padding: 24px; color: var(--text2); font-size: 13px; }
   .loading.show { display: block; }
-  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 10px; }
+  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: #5cb85c; border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 10px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .error { display: none; background: var(--error-bg); border: 1px solid var(--error-border); border-radius: 12px; padding: 12px 16px; color: var(--error-text); font-size: 13px; text-align: center; }
@@ -133,20 +165,25 @@
   .theme-bar { display: flex; justify-content: center; gap: 12px; padding: 8px 0; }
   .theme-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
   .theme-dot:active { transform: scale(0.85); }
-  .theme-dot.active { transform: scale(1.25); border-color: var(--text); }
-  .theme-dot.dark { background: radial-gradient(circle, #1e2235, #0a0c14); border-color: #4f8ef7; }
-  .theme-dot.light { background: radial-gradient(circle, #ffffff, #dde1f0); border-color: #2d6ef0; }
-  .theme-dot.colorful { background: linear-gradient(135deg, #a78bfa, #ec4899, #34d399); }
+  .theme-dot.active { transform: scale(1.25); border-color: #5cb85c; }
+  .theme-dot.dark { background: radial-gradient(circle, #1e2235, #0a0c14); border-color: #5cb85c; }
+  .theme-dot.light { background: radial-gradient(circle, #f0f7f0, #d0e8d0); border-color: #5cb85c; }
+  .theme-dot.colorful { background: linear-gradient(135deg, #5cb85c, #a78bfa, #ec4899); }
 </style>
 </head>
 <body>
+
+<!-- ARKA PLAN LOGO -->
+<img class="bg-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Kolay_Gelsin_logo.png/800px-Kolay_Gelsin_logo.png" alt="" onerror="this.style.display='none'">
+
 <div class="container">
 
   <div class="header-badge">YAZILIM ADANA DEPOYA AİTTİR</div>
 
   <div class="logo">
-    <h1>GONDERI SORGULA</h1>
-    <p>Kolay Gelsin · Musteri Bilgisi</p>
+    <div class="kg-label">KOLAY GELSİN</div>
+    <h1>GONDERİ SORGULA</h1>
+    <p>Kolay Gelsin Gonderi Sorgulama</p>
   </div>
 
   <div class="card">
