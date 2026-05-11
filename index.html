@@ -13,27 +13,30 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   [data-theme="dark"] {
-    --bg: #0f1117; --card: #1a1d27; --border: #2a2d3a; --text: #ffffff; --text2: #888;
-    --accent: #4f8ef7; --accent2: #3d7ee8; --btn-bg: #1e2235; --success: #4caf50;
-    --error-bg: #1f1015; --error-border: #3d1a20; --error-text: #e05555;
-    --call-bg: #1a2a1a; --call-border: #2a3d2a;
+    --bg: #0a0c14; --card: #13161f; --border: #1e2130; --text: #f0f0f0; --text2: #666;
+    --accent: #4f8ef7; --accent2: #3d7ee8; --btn-bg: #1a1d2e; --success: #4caf50;
+    --error-bg: #1a0f0f; --error-border: #3d1a20; --error-text: #e05555;
+    --call-bg: #0f1a0f; --call-border: #1e3d1e; --whatsapp: #25d366;
+    --shadow: rgba(0,0,0,0.4);
   }
   [data-theme="light"] {
-    --bg: #f0f2f8; --card: #ffffff; --border: #dde1f0; --text: #1a1d27; --text2: #888;
+    --bg: #eef1f8; --card: #ffffff; --border: #e0e4f0; --text: #1a1d2e; --text2: #999;
     --accent: #2d6ef0; --accent2: #1a5ee0; --btn-bg: #e8ecf8; --success: #2e7d32;
     --error-bg: #fff0f0; --error-border: #ffcdd2; --error-text: #c62828;
-    --call-bg: #e8f5e9; --call-border: #a5d6a7;
+    --call-bg: #e8f5e9; --call-border: #a5d6a7; --whatsapp: #128c7e;
+    --shadow: rgba(0,0,0,0.1);
   }
   [data-theme="colorful"] {
-    --bg: #1a0533; --card: rgba(255,255,255,0.08); --border: rgba(255,255,255,0.15);
-    --text: #ffffff; --text2: #aaaacc; --accent: #ff6b9d; --accent2: #e05585;
-    --btn-bg: rgba(255,107,157,0.15); --success: #00e676;
-    --error-bg: rgba(255,0,0,0.1); --error-border: rgba(255,0,0,0.3); --error-text: #ff6b6b;
-    --call-bg: rgba(0,230,118,0.1); --call-border: rgba(0,230,118,0.3);
+    --bg: #0d0720; --card: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.12);
+    --text: #ffffff; --text2: #9090bb; --accent: #a78bfa; --accent2: #8b5cf6;
+    --btn-bg: rgba(167,139,250,0.15); --success: #34d399;
+    --error-bg: rgba(255,0,0,0.08); --error-border: rgba(255,80,80,0.3); --error-text: #ff7070;
+    --call-bg: rgba(52,211,153,0.08); --call-border: rgba(52,211,153,0.3); --whatsapp: #34d399;
+    --shadow: rgba(0,0,0,0.5);
   }
 
   body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -41,100 +44,106 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 24px 20px;
     transition: background 0.3s, color 0.3s;
   }
+  [data-theme="colorful"] body {
+    background: radial-gradient(ellipse at top, #1a0533 0%, #0d0720 60%);
+  }
 
-  .container { width: 100%; max-width: 420px; }
+  .container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
 
-  .theme-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-  .theme-btn { width: 32px; height: 32px; border-radius: 50%; border: 2.5px solid transparent; cursor: pointer; transition: transform 0.2s; }
-  .theme-btn:active { transform: scale(0.9); }
-  .theme-btn.active { border-color: #fff; transform: scale(1.15); }
-  .theme-btn.dark { background: #1a1d27; border-color: #4f8ef7; }
-  .theme-btn.light { background: linear-gradient(135deg, #f0f2f8, #dde1f0); border-color: #2d6ef0; }
-  .theme-btn.colorful { background: linear-gradient(135deg, #ff6b9d, #6c63ff, #00e676); }
+  .logo { text-align: center; padding: 8px 0 4px; }
+  .logo h1 { font-size: 18px; font-weight: 700; letter-spacing: 2px; color: var(--text); opacity: 0.9; }
+  .logo p { font-size: 11px; color: var(--text2); margin-top: 4px; letter-spacing: 0.5px; }
 
-  .logo { text-align: center; margin-bottom: 24px; }
-  .logo h1 { font-size: 20px; font-weight: 700; letter-spacing: 1px; color: var(--text); }
-  .logo p { font-size: 12px; color: var(--text2); margin-top: 5px; }
+  .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 4px 24px var(--shadow); }
 
-  .card { background: var(--card); border-radius: 16px; padding: 24px 20px; border: 1px solid var(--border); backdrop-filter: blur(10px); }
-  label { display: block; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  label { display: block; font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
 
-  .input-row { display: flex; gap: 8px; }
+  .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
   input {
     flex: 1; background: var(--bg); border: 1.5px solid var(--border);
-    border-radius: 10px; padding: 14px 16px; font-size: 17px; color: var(--text);
-    outline: none; transition: border-color 0.2s; letter-spacing: 1px;
+    border-radius: 12px; padding: 13px 16px; font-size: 16px; color: var(--text);
+    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
   }
   [data-theme="colorful"] input { background: rgba(0,0,0,0.3); }
-  input:focus { border-color: var(--accent); }
-  input::placeholder { color: var(--text2); font-size: 13px; letter-spacing: 0; opacity: 0.5; }
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,142,247,0.1); }
+  input::placeholder { color: var(--text2); font-size: 13px; opacity: 0.6; }
 
   .paste-btn {
-    background: var(--btn-bg); border: 1.5px solid var(--border); border-radius: 10px;
-    padding: 14px; color: var(--accent); font-size: 13px; font-weight: 600;
-    cursor: pointer; white-space: nowrap;
+    background: var(--btn-bg); border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 13px 14px; color: var(--accent); font-size: 12px; font-weight: 700;
+    cursor: pointer; white-space: nowrap; transition: all 0.2s;
   }
-  .paste-btn:active { opacity: 0.8; }
+  .paste-btn:active { transform: scale(0.95); opacity: 0.8; }
 
   .sorgu-btn {
     width: 100%; background: var(--accent); color: #fff; border: none;
-    border-radius: 10px; padding: 15px; font-size: 16px; font-weight: 600;
-    cursor: pointer; margin-top: 12px; transition: background 0.2s, transform 0.1s;
+    border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(79,142,247,0.3);
   }
   .sorgu-btn:active { transform: scale(0.98); }
-  .sorgu-btn:disabled { background: var(--border); color: var(--text2); cursor: not-allowed; }
+  .sorgu-btn:disabled { background: var(--border); color: var(--text2); cursor: not-allowed; box-shadow: none; }
 
-  .result { margin-top: 16px; background: var(--card); border-radius: 12px; padding: 18px; border: 1px solid var(--border); display: none; backdrop-filter: blur(10px); }
+  .result { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 4px 24px var(--shadow); display: none; }
   .result.show { display: block; }
-  .result-row { display: flex; flex-direction: column; gap: 4px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+
+  .result-row { padding: 12px 0; border-bottom: 1px solid var(--border); }
   .result-row:last-child { border-bottom: none; padding-bottom: 0; }
   .result-row:first-child { padding-top: 0; }
-  .result-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-  .result-value-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .result-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 5px; }
   .result-value { font-size: 17px; font-weight: 600; color: var(--text); }
-  .result-value.phone { color: var(--accent); font-size: 20px; letter-spacing: 1px; }
-  .result-value.phone4 { color: var(--text2); font-size: 12px; font-weight: 500; }
+  .result-value.name { font-size: 19px; font-weight: 700; }
 
-  .copy-btn {
-    background: var(--btn-bg); border: 1px solid var(--border); border-radius: 7px;
-    padding: 6px 10px; color: var(--accent); font-size: 12px; font-weight: 600;
-    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  .phone-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .phone-info { display: flex; flex-direction: column; gap: 2px; }
+  .phone-number { font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+  .phone-last4 { font-size: 11px; color: var(--text2); font-weight: 500; }
+  .phone-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+  .action-btn {
+    width: 42px; height: 42px; border-radius: 12px; border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.2s; background: var(--btn-bg);
+    text-decoration: none;
   }
-  .copy-btn.copied { color: var(--success); }
+  .action-btn:active { transform: scale(0.88); }
+  .action-btn.copy { color: var(--accent); font-size: 16px; font-weight: 700; }
+  .action-btn.copy.copied { color: var(--success); border-color: var(--success); }
+  .action-btn.whatsapp { color: var(--whatsapp); border-color: rgba(37,211,102,0.25); background: rgba(37,211,102,0.06); }
+  .action-btn.call { color: var(--success); border-color: var(--call-border); background: var(--call-bg); }
 
-  .loading { display: none; text-align: center; padding: 20px; color: var(--text2); font-size: 14px; }
+  .loading { display: none; text-align: center; padding: 24px; color: var(--text2); font-size: 13px; }
   .loading.show { display: block; }
-  .spinner { width: 22px; height: 22px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 10px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .error { display: none; background: var(--error-bg); border: 1px solid var(--error-border); border-radius: 10px; padding: 12px 16px; margin-top: 12px; color: var(--error-text); font-size: 13px; text-align: center; }
+  .error { display: none; background: var(--error-bg); border: 1px solid var(--error-border); border-radius: 12px; padding: 12px 16px; color: var(--error-text); font-size: 13px; text-align: center; }
   .error.show { display: block; }
 
-  .call-btn { display: block; background: var(--call-bg); border: 1px solid var(--call-border); border-radius: 10px; padding: 13px; margin-top: 10px; color: var(--success); font-size: 15px; font-weight: 600; text-align: center; text-decoration: none; }
-  .call-btn:active { opacity: 0.8; }
+  .theme-bar { display: flex; justify-content: center; gap: 12px; padding: 8px 0; }
+  .theme-dot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
+  .theme-dot:active { transform: scale(0.85); }
+  .theme-dot.active { transform: scale(1.25); border-color: var(--text); }
+  .theme-dot.dark { background: radial-gradient(circle, #1e2235, #0a0c14); border-color: #4f8ef7; }
+  .theme-dot.light { background: radial-gradient(circle, #ffffff, #dde1f0); border-color: #2d6ef0; }
+  .theme-dot.colorful { background: linear-gradient(135deg, #a78bfa, #ec4899, #34d399); }
 </style>
 </head>
 <body>
 <div class="container">
 
-  <div class="theme-bar">
-    <button class="theme-btn dark" onclick="temaAyarla('dark')" title="Koyu"></button>
-    <button class="theme-btn light" onclick="temaAyarla('light')" title="Acik"></button>
-    <button class="theme-btn colorful" onclick="temaAyarla('colorful')" title="Renkli"></button>
-  </div>
-
   <div class="logo">
     <h1>GONDERI SORGULA</h1>
-    <p>Kolay Gelsin Musteri Bilgisi</p>
+    <p>Kolay Gelsin · Musteri Bilgisi</p>
   </div>
 
   <div class="card">
-    <label>Gonderi No veya Barkod</label>
+    <label>Gonderi No</label>
     <div class="input-row">
-      <input type="text" id="gonderiNo" placeholder="Numara veya barkod girin" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off">
+      <input type="text" id="gonderiNo" placeholder="Gonderi numarasi girin" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off">
       <button class="paste-btn" onclick="yapistir()">Yapıştır</button>
     </div>
     <button class="sorgu-btn" id="sorgulaBtn" onclick="sorgula()">Sorgula</button>
@@ -149,31 +158,44 @@
 
   <div class="result" id="result">
     <div class="result-row">
-      <span class="result-label">Gonderi No</span>
-      <div class="result-value-row">
-        <span class="result-value" id="resGonderiNo"></span>
-      </div>
+      <div class="result-label">Gonderi No</div>
+      <div class="result-value" id="resGonderiNo"></div>
     </div>
     <div class="result-row">
-      <span class="result-label">Ad Soyad</span>
-      <div class="result-value-row">
-        <span class="result-value" id="resAdSoyad"></span>
-      </div>
+      <div class="result-label">Ad Soyad</div>
+      <div class="result-value name" id="resAdSoyad"></div>
     </div>
     <div class="result-row">
-      <span class="result-label">Telefon</span>
-      <div class="result-value-row">
-        <div>
-          <span class="result-value phone" id="resTelefon"></span>
-          <span class="result-value phone4" id="resTelefon4"></span>
+      <div class="result-label">Telefon</div>
+      <div class="phone-row">
+        <div class="phone-info">
+          <span class="phone-number" id="resTelefon"></span>
+          <span class="phone-last4" id="resTelefon4"></span>
         </div>
-        <button class="copy-btn" id="copyTelBtn" onclick="kopyalaTel()">Kopyala</button>
+        <div class="phone-actions">
+          <button class="action-btn copy" id="copyBtn" onclick="kopyalaSon4()" title="Son 4 haneyi kopyala">⊕</button>
+          <a class="action-btn whatsapp" id="waBtn" href="#" title="WhatsApp">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+          </a>
+          <a class="action-btn call" id="callBtn" href="#" title="Ara">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
-    <a class="call-btn" id="callBtn" href="#">Ara</a>
   </div>
-</div>
 
+  <div class="theme-bar">
+    <button class="theme-dot dark" onclick="temaAyarla('dark')" title="Koyu"></button>
+    <button class="theme-dot light" onclick="temaAyarla('light')" title="Acik"></button>
+    <button class="theme-dot colorful" onclick="temaAyarla('colorful')" title="Renkli"></button>
+  </div>
+
+</div>
 <script>
   const kaydedilmis = localStorage.getItem("tema") || "dark";
   temaAyarla(kaydedilmis);
@@ -181,8 +203,8 @@
   function temaAyarla(tema) {
     document.documentElement.setAttribute("data-theme", tema);
     localStorage.setItem("tema", tema);
-    document.querySelectorAll(".theme-btn").forEach(b => b.classList.remove("active"));
-    document.querySelector(".theme-btn." + tema).classList.add("active");
+    document.querySelectorAll(".theme-dot").forEach(b => b.classList.remove("active"));
+    document.querySelector(".theme-dot." + tema).classList.add("active");
   }
 
   document.getElementById("gonderiNo").addEventListener("keydown", function(e) {
@@ -197,14 +219,15 @@
     } catch (e) { document.getElementById("gonderiNo").focus(); }
   }
 
-  function kopyalaTel() {
+  function kopyalaSon4() {
     const tel = document.getElementById("resTelefon").textContent;
     if (!tel) return;
-    navigator.clipboard.writeText(tel).then(() => {
-      const btn = document.getElementById("copyTelBtn");
-      btn.textContent = "Kopyalandi!";
+    const son4 = tel.slice(-4);
+    navigator.clipboard.writeText(son4).then(() => {
+      const btn = document.getElementById("copyBtn");
+      btn.innerHTML = "✓";
       btn.classList.add("copied");
-      setTimeout(() => { btn.textContent = "Kopyala"; btn.classList.remove("copied"); }, 2000);
+      setTimeout(() => { btn.innerHTML = "⊕"; btn.classList.remove("copied"); }, 2000);
     });
   }
 
@@ -228,9 +251,18 @@
       const tel = data.telefon || "";
       document.getElementById("resTelefon").textContent = tel;
       document.getElementById("resTelefon4").textContent = tel.length >= 4 ? "Son 4: " + tel.slice(-4) : "";
+      const waBtn = document.getElementById("waBtn");
       const callBtn = document.getElementById("callBtn");
-      if (tel) { callBtn.href = "tel:" + tel; callBtn.style.display = "block"; }
-      else { callBtn.style.display = "none"; }
+      if (tel) {
+        const temizTel = tel.replace(/^0/, "90");
+        waBtn.href = "https://wa.me/" + temizTel;
+        callBtn.href = "tel:" + tel;
+        waBtn.style.display = "flex";
+        callBtn.style.display = "flex";
+      } else {
+        waBtn.style.display = "none";
+        callBtn.style.display = "none";
+      }
       document.getElementById("result").classList.add("show");
     } catch (e) {
       gosterHata("Sunucu hatasi, tekrar deneyin.");
