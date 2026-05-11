@@ -1,6 +1,5 @@
 const express = require("express");
 const axios = require("axios");
-const path = require("path");
 
 const app = express();
 app.use(express.json());
@@ -45,23 +44,34 @@ async function gonderiGetir(gonderiNo) {
     "origin": "https://kurumsal.kolaygelsin.com",
   };
 
-  // Önce gönderi no ile dene
   let shipment = null;
-  const r1 = await axios.post(API_BASE + "/GetShipments", {
-    ShipmentId: gonderiNo,
-    PageSize: 10,
-    PageNumber: 1
-  }, { headers });
-  shipment = r1.data?.Payload?.ResultList?.[0];
 
-  // Bulunamazsa barkod ile dene
-  if (!shipment) {
-    const r1b = await axios.post(API_BASE + "/GetShipments", {
+  // Uzun barkod ise CustomerBarcode ile sorgula
+  if (gonderiNo.length > 15) {
+    const r = await axios.post(API_BASE + "/GetShipments", {
       CustomerBarcode: gonderiNo,
       PageSize: 10,
       PageNumber: 1
     }, { headers });
-    shipment = r1b.data?.Payload?.ResultList?.[0];
+    shipment = r.data?.Payload?.ResultList?.[0];
+  } else {
+    // Kısa numara ise ShipmentId ile sorgula
+    const r = await axios.post(API_BASE + "/GetShipments", {
+      ShipmentId: gonderiNo,
+      PageSize: 10,
+      PageNumber: 1
+    }, { headers });
+    shipment = r.data?.Payload?.ResultList?.[0];
+
+    // Bulunamazsa CustomerBarcode ile de dene
+    if (!shipment) {
+      const r2 = await axios.post(API_BASE + "/GetShipments", {
+        CustomerBarcode: gonderiNo,
+        PageSize: 10,
+        PageNumber: 1
+      }, { headers });
+      shipment = r2.data?.Payload?.ResultList?.[0];
+    }
   }
 
   if (!shipment) throw new Error("Gonderi bulunamadi");
@@ -69,8 +79,8 @@ async function gonderiGetir(gonderiNo) {
   const adSoyad = shipment.RecipientName || "";
   const shipmentId = shipment.ShipmentId;
 
-  const r2 = await axios.post(API_BASE + "/GetShipmentById", { ShipmentId: shipmentId }, { headers });
-  const gsm = r2.data?.Payload?.Recipient?.Gsm || "";
+  const r3 = await axios.post(API_BASE + "/GetShipmentById", { ShipmentId: shipmentId }, { headers });
+  const gsm = r3.data?.Payload?.Recipient?.Gsm || "";
   let telefon = "";
   if (gsm.startsWith("5") && gsm.length === 10) telefon = "0" + gsm;
   else if (gsm.startsWith("05") && gsm.length === 11) telefon = gsm;
