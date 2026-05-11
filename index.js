@@ -5,7 +5,7 @@ const path = require("path");
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(__dirname));
 
 const KOLAYGELSIN_KULLANICI = "seyhanbs";
 const KOLAYGELSIN_SIFRE     = "153759";
