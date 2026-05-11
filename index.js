@@ -7,60 +7,89 @@ app.use(express.static(__dirname));
 
 const KOLAYGELSIN_KULLANICI = "seyhanbs";
 const KOLAYGELSIN_SIFRE     = "153759";
-const BROWSERLESS_KEY       = "2UUU9ks8ljiUIFPef1975f4001009046682ef4aaa174d1f20";
-const BROWSERLESS_URL       = `https://production-sfo.browserless.io/scrape?token=${BROWSERLESS_KEY}`;
+const API_BASE              = "https://api.kolaygelsin.com/api/request";
+
+let token = null;
+let tokenZamani = null;
+
+// Token al
+async function tokenAl() {
+  try {
+    const res = await axios.post(`${API_BASE}/Login`, {
+      Username: KOLAYGELSIN_KULLANICI,
+      Password: KOLAYGELSIN_SIFRE,
+      Channel: "Portal"
+    }, {
+      headers: { "Content-Type": "application/json" }
+    });
+
+    const t = res.data?.Payload?.Token || res.data?.token || res.data?.Token;
+    if (t) {
+      token = t;
+      tokenZamani = Date.now();
+      console.log("Token alindi!");
+      return true;
+    }
+    console.log("Token yaniti:", JSON.stringify(res.data).substring(0, 200));
+    return false;
+  } catch (e) {
+    console.error("Token hatasi:", e.message);
+    return false;
+  }
+}
+
+// Token geçerli mi kontrol et (23 saatte bir yenile)
+async function tokenKontrol() {
+  if (!token || !tokenZamani || (Date.now() - tokenZamani) > 23 * 60 * 60 * 1000) {
+    await tokenAl();
+  }
+}
 
 async function gonderiGetir(gonderiNo) {
-  const sorguScript = {
-    url: "https://kurumsal.kolaygelsin.com/login",
-    elements: [{ selector: "body" }],
-    gotoOptions: { waitUntil: "networkidle2", timeout: 30000 },
-    scripts: [{
-      code: `async () => {
-        const inputs = document.querySelectorAll('input');
-        if (inputs[0]) { inputs[0].value = '${KOLAYGELSIN_KULLANICI}'; inputs[0].dispatchEvent(new Event('input', { bubbles: true })); }
-        if (inputs[1]) { inputs[1].value = '${KOLAYGELSIN_SIFRE}'; inputs[1].dispatchEvent(new Event('input', { bubbles: true })); }
-        const btn = Array.from(document.querySelectorAll('button')).find(b => b.type === 'submit' || b.innerText?.toLowerCase().includes('giri'));
-        if (btn) btn.click();
-        await new Promise(r => setTimeout(r, 4000));
-        location.href = 'https://kurumsal.kolaygelsin.com/pages/shipments/shipmentTrack';
-        await new Promise(r => setTimeout(r, 3000));
-        const inp = document.querySelector('input[type="text"]');
-        if (inp) { inp.value = '${gonderiNo}'; inp.dispatchEvent(new Event('input', { bubbles: true })); inp.dispatchEvent(new Event('change', { bubbles: true })); }
-        await new Promise(r => setTimeout(r, 500));
-        const filtrele = Array.from(document.querySelectorAll('button')).find(b => b.innerText?.toLowerCase().includes('filtrele'));
-        if (filtrele) filtrele.click();
-        await new Promise(r => setTimeout(r, 3000));
-        const row = document.querySelector('tbody tr');
-        if (row) row.click();
-        await new Promise(r => setTimeout(r, 1000));
-        const detay = Array.from(document.querySelectorAll('button, a')).find(b => b.innerText?.toLowerCase().includes('ayrıntılar'));
-        if (detay) detay.click();
-        await new Promise(r => setTimeout(r, 2000));
-        return document.body.innerText;
-      }`
-    }]
+  await tokenKontrol();
+  if (!token) throw new Error("Token alinamadi");
+
+  const headers = {
+    "Content-Type": "application/json",
+    "Authorization": `bearer ${token}`,
+    "access-control-allow-methods": "GET, POST, PUT, DELETE",
+    "access-control-allow-origin": "*",
   };
 
-  const res = await axios.post(BROWSERLESS_URL, sorguScript, {
-    headers: { "Content-Type": "application/json" },
-    timeout: 60000,
-  });
+  // Adım 1: GetShipments — ad soyad al
+  const shipmentsRes = await axios.post(`${API_BASE}/GetShipments`, {
+    ShipmentId: gonderiNo,
+    PageSize: 10,
+    PageNumber: 1
+  }, { headers });
 
-  const metin = res.data?.scripts?.[0]?.result || "";
-  console.log("Sayfa:", metin.substring(0, 300));
+  console.log("GetShipments:", JSON.stringify(shipmentsRes.data?.Payload?.ResultList?.[0]).substring(0, 200));
 
-  const satirlar = metin.split("\n").map(s => s.trim()).filter(s => s);
-  let adSoyad = "";
-  for (let i = 0; i < satirlar.length; i++) {
-    if (satirlar[i].toLowerCase().includes("alıcı adı soyadı") || satirlar[i].toLowerCase().includes("alıcı adı")) {
-      adSoyad = satirlar[i + 1] || ""; break;
-    }
-  }
+  const shipment = shipmentsRes.data?.Payload?.ResultList?.[0];
+  if (!shipment) throw new Error("Gonderi bulunamadi");
+
+  const adSoyad = shipment.RecipientName || "";
+  const shipmentId = shipment.ShipmentId;
+
+  // Adım 2: GetShipmentById — telefon al
+  const detayRes = await axios.post(`${API_BASE}/GetShipmentById`, {
+    ShipmentId: shipmentId
+  }, { headers });
+
+  console.log("GetShipmentById:", JSON.stringify(detayRes.data?.Payload).substring(0, 300));
+
+  const detay = detayRes.data?.Payload;
+  
+  // Telefon numarasını bul
   let telefon = "";
-  const gsmMatch = metin.match(/Gsm[:\s]+(5\d{9})/i);
-  if (gsmMatch) { telefon = "0" + gsmMatch[1]; }
-  else { const t = (metin.match(/0?5\d{9}/g) || []).find(t => t.replace(/^0/,"").startsWith("5")); if (t) telefon = t.startsWith("0") ? t : "0"+t; }
+  const detayStr = JSON.stringify(detay);
+  const gsmMatch = detayStr.match(/"(5\d{9})"/);
+  if (gsmMatch) {
+    telefon = "0" + gsmMatch[1];
+  } else {
+    const telMatch = detayStr.match(/"0?(5\d{9})"/);
+    if (telMatch) telefon = "0" + telMatch[1].replace(/^0/, "");
+  }
 
   return { adSoyad, telefon };
 }
@@ -77,6 +106,9 @@ app.post("/sorgula", async (req, res) => {
     res.json({ hata: "Sorgu basarisiz: " + e.message });
   }
 });
+
+// Başlangıçta token al
+tokenAl();
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Sunucu calisiyor! Port: ${PORT}`));
