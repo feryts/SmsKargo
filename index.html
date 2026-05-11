@@ -17,14 +17,14 @@
     --accent: #5cb85c; --accent2: #4cae4c; --btn-bg: #1a1d2e; --success: #4caf50;
     --error-bg: #1a0f0f; --error-border: #3d1a20; --error-text: #e05555;
     --call-bg: #0f1a0f; --call-border: #1e3d1e; --shadow: rgba(0,0,0,0.4);
-    --logo-opacity: 0.04;
+    --logo-opacity: 0.05;
   }
   [data-theme="light"] {
     --bg: #f0f7f0; --card: #ffffff; --border: #d0e8d0; --text: #1a2e1a; --text2: #999;
     --accent: #5cb85c; --accent2: #4cae4c; --btn-bg: #e8f5e8; --success: #2e7d32;
     --error-bg: #fff0f0; --error-border: #ffcdd2; --error-text: #c62828;
     --call-bg: #e8f5e9; --call-border: #a5d6a7; --shadow: rgba(0,0,0,0.08);
-    --logo-opacity: 0.06;
+    --logo-opacity: 0.07;
   }
   [data-theme="colorful"] {
     --bg: #0d0720; --card: rgba(255,255,255,0.06); --border: rgba(255,255,255,0.12);
@@ -53,30 +53,23 @@
     background: radial-gradient(ellipse at top, #1a0533 0%, #0d0720 60%);
   }
 
-  /* ARKA PLAN LOGO */
   .bg-logo {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 90vw;
-    max-width: 500px;
+    width: 95vw;
+    max-width: 520px;
     opacity: var(--logo-opacity);
     pointer-events: none;
     z-index: 0;
-    filter: grayscale(30%);
+    filter: grayscale(20%);
   }
 
   .container {
     width: 100%; max-width: 400px;
     display: flex; flex-direction: column; gap: 12px;
     position: relative; z-index: 1;
-  }
-
-  .header-badge {
-    text-align: center; font-size: 10px; color: var(--text2);
-    opacity: 0.6; letter-spacing: 2px; text-transform: uppercase;
-    padding: 4px 0; font-weight: 600;
   }
 
   .logo { text-align: center; padding: 4px 0; }
@@ -173,12 +166,9 @@
 </head>
 <body>
 
-<!-- ARKA PLAN LOGO -->
-<img class="bg-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Kolay_Gelsin_logo.png/800px-Kolay_Gelsin_logo.png" alt="" onerror="this.style.display='none'">
+<img class="bg-logo" src="/logo.png" alt="" onerror="this.style.display='none'">
 
 <div class="container">
-
-  <div class="header-badge">YAZILIM ADANA DEPOYA AİTTİR</div>
 
   <div class="logo">
     <div class="kg-label">KOLAY GELSİN</div>
