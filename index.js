@@ -58,6 +58,10 @@ async function gonderiGetir(gonderiNo) {
 
 const cache = {};
 
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/index.html");
+});
+
 app.post("/sorgula", async (req, res) => {
   const gonderiNo = req.body?.gonderiNo;
   if (!gonderiNo) return res.json({ hata: "Gonderi no eksik" });
