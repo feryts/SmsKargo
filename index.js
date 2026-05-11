@@ -6,8 +6,8 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 const KOLAYGELSIN_KULLANICI = "seyhanbs";
-const KOLAYGELSIN_SIFRE     = "153759";
-const API_BASE              = "https://api.kolaygelsin.com/api/request";
+const KOLAYGELSIN_SIFRE = "153759";
+const API_BASE = "https://api.kolaygelsin.com/api/request";
 
 let token = null;
 let tokenZamani = null;
@@ -22,92 +22,51 @@ async function tokenAl() {
     formData.append("CustomerType", "null");
     formData.append("CaptchaToken", "");
     formData.append("VerificationCode", "");
-
-    const res = await axios.post(`${API_BASE}/login`, formData.toString(), {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "origin": "https://kurumsal.kolaygelsin.com",
-        "referer": "https://kurumsal.kolaygelsin.com/",
-      }
+    const res = await axios.post(API_BASE + "/login", formData.toString(), {
+      headers: { "Content-Type": "application/x-www-form-urlencoded", "origin": "https://kurumsal.kolaygelsin.com" }
     });
-
-    console.log("Login yaniti:", JSON.stringify(res.data).substring(0, 300));
-
-    const t = res.data?.access_token || res.data?.token || res.data?.Token || res.data?.Payload?.Token;
-    if (t) {
-      token = t;
-      tokenZamani = Date.now();
-      console.log("Token alindi!");
-      return true;
-    }
+    const t = res.data.access_token || res.data.token || res.data.Token;
+    if (t) { token = t; tokenZamani = Date.now(); console.log("Token alindi!"); return true; }
     return false;
-  } catch (e) {
-    console.error("Token hatasi:", e.response?.data || e.message);
-    return false;
-  }
+  } catch (e) { console.error("Token hatasi:", e.message); return false; }
 }
 
 async function tokenKontrol() {
-  if (!token || !tokenZamani || (Date.now() - tokenZamani) > 23 * 60 * 60 * 1000) {
-    await tokenAl();
-  }
+  if (!token || !tokenZamani || (Date.now() - tokenZamani) > 23 * 60 * 60 * 1000) await tokenAl();
 }
 
 async function gonderiGetir(gonderiNo) {
   await tokenKontrol();
   if (!token) throw new Error("Token alinamadi");
-
   const headers = {
     "Content-Type": "application/json",
-    "Authorization": `bearer ${token}`,
-    "access-control-allow-methods": "GET, POST, PUT, DELETE",
-    "access-control-allow-origin": "*",
+    "Authorization": "bearer " + token,
     "origin": "https://kurumsal.kolaygelsin.com",
-    "referer": "https://kurumsal.kolaygelsin.com/",
   };
-
-  // Adım 1: GetShipments
-  const shipmentsRes = await axios.post(`${API_BASE}/GetShipments`, {
-    ShipmentId: gonderiNo,
-    PageSize: 10,
-    PageNumber: 1
-  }, { headers });
-
-  const shipment = shipmentsRes.data?.Payload?.ResultList?.[0];
+  const r1 = await axios.post(API_BASE + "/GetShipments", { ShipmentId: gonderiNo, PageSize: 10, PageNumber: 1 }, { headers });
+  const shipment = r1.data?.Payload?.ResultList?.[0];
   if (!shipment) throw new Error("Gonderi bulunamadi");
-
   const adSoyad = shipment.RecipientName || "";
   const shipmentId = shipment.ShipmentId;
-
-  console.log("Ad Soyad:", adSoyad, "ShipmentId:", shipmentId);
-
-  // Adım 2: GetShipmentById — telefon al
-  const detayRes = await axios.post(`${API_BASE}/GetShipmentById`, {
-    ShipmentId: shipmentId
-  }, { headers });
-
-  const detayStr = JSON.stringify(detayRes.data?.Payload || "");
-  console.log("Detay:", detayStr.substring(0, 300));
-
-  // Telefon numarasını bul
+  const r2 = await axios.post(API_BASE + "/GetShipmentById", { ShipmentId: shipmentId }, { headers });
+  const gsm = r2.data?.Payload?.Recipient?.Gsm || "";
   let telefon = "";
-  const gsmMatch = detayStr.match(/"(5\d{9})"/);
-  if (gsmMatch) {
-    telefon = "0" + gsmMatch[1];
-  } else {
-    const telMatch = detayStr.match(/0(5\d{9})/);
-    if (telMatch) telefon = "0" + telMatch[1];
-  }
-
+  if (gsm.startsWith("5") && gsm.length === 10) telefon = "0" + gsm;
+  else if (gsm.startsWith("05") && gsm.length === 11) telefon = gsm;
   return { adSoyad, telefon };
 }
 
+const cache = {};
+
 app.post("/sorgula", async (req, res) => {
-  const { gonderiNo } = req.body;
+  const gonderiNo = req.body?.gonderiNo;
   if (!gonderiNo) return res.json({ hata: "Gonderi no eksik" });
+  const key = gonderiNo.toUpperCase();
+  if (cache[key] && (Date.now() - cache[key].zaman) < 3600000) return res.json(cache[key].data);
   try {
-    const bilgi = await gonderiGetir(gonderiNo.toUpperCase());
+    const bilgi = await gonderiGetir(key);
     if (!bilgi.adSoyad && !bilgi.telefon) return res.json({ hata: "Bilgi bulunamadi" });
+    cache[key] = { data: bilgi, zaman: Date.now() };
     res.json(bilgi);
   } catch (e) {
     console.error("Hata:", e.message);
@@ -116,6 +75,5 @@ app.post("/sorgula", async (req, res) => {
 });
 
 tokenAl();
-
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Sunucu calisiyor! Port: ${PORT}`));
+app.listen(PORT, () => console.log("Sunucu calisiyor! Port: " + PORT));
