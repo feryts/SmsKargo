@@ -46,30 +46,14 @@ async function gonderiGetir(gonderiNo) {
 
   let shipment = null;
 
-  // Uzun barkod ise CustomerBarcode ile sorgula
   if (gonderiNo.length > 15) {
-    const r = await axios.post(API_BASE + "/GetShipments", {
-      CustomerBarcode: gonderiNo,
-      PageSize: 10,
-      PageNumber: 1
-    }, { headers });
+    const r = await axios.post(API_BASE + "/GetShipments", { CustomerBarcode: gonderiNo, PageSize: 10, PageNumber: 1 }, { headers });
     shipment = r.data?.Payload?.ResultList?.[0];
   } else {
-    // Kısa numara ise ShipmentId ile sorgula
-    const r = await axios.post(API_BASE + "/GetShipments", {
-      ShipmentId: gonderiNo,
-      PageSize: 10,
-      PageNumber: 1
-    }, { headers });
+    const r = await axios.post(API_BASE + "/GetShipments", { ShipmentId: gonderiNo, PageSize: 10, PageNumber: 1 }, { headers });
     shipment = r.data?.Payload?.ResultList?.[0];
-
-    // Bulunamazsa CustomerBarcode ile de dene
     if (!shipment) {
-      const r2 = await axios.post(API_BASE + "/GetShipments", {
-        CustomerBarcode: gonderiNo,
-        PageSize: 10,
-        PageNumber: 1
-      }, { headers });
+      const r2 = await axios.post(API_BASE + "/GetShipments", { CustomerBarcode: gonderiNo, PageSize: 10, PageNumber: 1 }, { headers });
       shipment = r2.data?.Payload?.ResultList?.[0];
     }
   }
@@ -89,6 +73,26 @@ async function gonderiGetir(gonderiNo) {
 
 const cache = {};
 
+// Saatte bir cache temizle
+setInterval(() => {
+  const simdi = Date.now();
+  let temizlenen = 0;
+  for (const key in cache) {
+    if (simdi - cache[key].zaman > 3600000) {
+      delete cache[key];
+      temizlenen++;
+    }
+  }
+  if (temizlenen > 0) console.log("Cache temizlendi:", temizlenen, "kayit silindi");
+}, 3600000);
+
+// Uyku modunu engelle - kendi kendine ping
+setInterval(async () => {
+  try {
+    await axios.get("https://sms-kargo.vercel.app/");
+  } catch (e) {}
+}, 5 * 60 * 1000);
+
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
@@ -97,7 +101,10 @@ app.post("/sorgula", async (req, res) => {
   const gonderiNo = req.body?.gonderiNo;
   if (!gonderiNo) return res.json({ hata: "Gonderi no eksik" });
   const key = gonderiNo.toUpperCase();
-  if (cache[key] && (Date.now() - cache[key].zaman) < 3600000) return res.json(cache[key].data);
+  if (cache[key] && (Date.now() - cache[key].zaman) < 3600000) {
+    console.log("Cache'den geldi:", key);
+    return res.json(cache[key].data);
+  }
   try {
     const bilgi = await gonderiGetir(key);
     if (!bilgi.adSoyad && !bilgi.telefon) return res.json({ hata: "Bilgi bulunamadi" });
