@@ -1,5 +1,6 @@
 const express = require("express");
 const axios = require("axios");
+const path = require("path");
 
 const app = express();
 app.use(express.json());
@@ -43,11 +44,31 @@ async function gonderiGetir(gonderiNo) {
     "Authorization": "bearer " + token,
     "origin": "https://kurumsal.kolaygelsin.com",
   };
-  const r1 = await axios.post(API_BASE + "/GetShipments", { ShipmentId: gonderiNo, PageSize: 10, PageNumber: 1 }, { headers });
-  const shipment = r1.data?.Payload?.ResultList?.[0];
+
+  // Önce gönderi no ile dene
+  let shipment = null;
+  const r1 = await axios.post(API_BASE + "/GetShipments", {
+    ShipmentId: gonderiNo,
+    PageSize: 10,
+    PageNumber: 1
+  }, { headers });
+  shipment = r1.data?.Payload?.ResultList?.[0];
+
+  // Bulunamazsa barkod ile dene
+  if (!shipment) {
+    const r1b = await axios.post(API_BASE + "/GetShipments", {
+      CustomerBarcode: gonderiNo,
+      PageSize: 10,
+      PageNumber: 1
+    }, { headers });
+    shipment = r1b.data?.Payload?.ResultList?.[0];
+  }
+
   if (!shipment) throw new Error("Gonderi bulunamadi");
+
   const adSoyad = shipment.RecipientName || "";
   const shipmentId = shipment.ShipmentId;
+
   const r2 = await axios.post(API_BASE + "/GetShipmentById", { ShipmentId: shipmentId }, { headers });
   const gsm = r2.data?.Payload?.Recipient?.Gsm || "";
   let telefon = "";
