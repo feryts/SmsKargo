@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Gonderi Sorgula</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0f1117;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .container { width: 100%; max-width: 420px; }
+  .logo { text-align: center; margin-bottom: 40px; }
+  .logo h1 { font-size: 22px; font-weight: 700; letter-spacing: 1px; color: #fff; }
+  .logo p { font-size: 13px; color: #666; margin-top: 6px; }
+  .card { background: #1a1d27; border-radius: 16px; padding: 28px 24px; border: 1px solid #2a2d3a; }
+  label { display: block; font-size: 12px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  input { width: 100%; background: #0f1117; border: 1.5px solid #2a2d3a; border-radius: 10px; padding: 14px 16px; font-size: 18px; color: #fff; outline: none; transition: border-color 0.2s; letter-spacing: 1px; }
+  input:focus { border-color: #4f8ef7; }
+  input::placeholder { color: #3a3d4a; font-size: 14px; letter-spacing: 0; }
+  button { width: 100%; background: #4f8ef7; color: #fff; border: none; border-radius: 10px; padding: 15px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 16px; transition: background 0.2s, transform 0.1s; }
+  button:active { transform: scale(0.98); }
+  button:hover { background: #3d7ee8; }
+  button:disabled { background: #2a2d3a; color: #555; cursor: not-allowed; }
+  .result { margin-top: 20px; background: #0f1117; border-radius: 12px; padding: 20px; border: 1px solid #2a2d3a; display: none; }
+  .result.show { display: block; }
+  .result-row { display: flex; flex-direction: column; gap: 4px; padding: 12px 0; border-bottom: 1px solid #1a1d27; }
+  .result-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .result-row:first-child { padding-top: 0; }
+  .result-label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+  .result-value { font-size: 18px; font-weight: 600; color: #fff; }
+  .result-value.phone { color: #4f8ef7; font-size: 22px; letter-spacing: 1px; }
+  .loading { display: none; text-align: center; padding: 20px; color: #555; font-size: 14px; }
+  .loading.show { display: block; }
+  .spinner { width: 24px; height: 24px; border: 2px solid #2a2d3a; border-top-color: #4f8ef7; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error { display: none; background: #1f1015; border: 1px solid #3d1a20; border-radius: 10px; padding: 14px 16px; margin-top: 16px; color: #e05555; font-size: 14px; text-align: center; }
+  .error.show { display: block; }
+  .call-btn { display: block; background: #1a2a1a; border: 1px solid #2a3d2a; border-radius: 10px; padding: 14px; margin-top: 12px; color: #4caf50; font-size: 16px; font-weight: 600; text-align: center; text-decoration: none; }
+  .call-btn:active { background: #1f331f; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo">
+    <h1>GONDERI SORGULA</h1>
+    <p>Kolay Gelsin Musteri Bilgisi</p>
+  </div>
+  <div class="card">
+    <label>Gonderi Takip Numarasi</label>
+    <input type="text" id="gonderiNo" placeholder="Ornek: 190878426" inputmode="numeric" autocomplete="off" autocorrect="off" autocapitalize="off">
+    <button id="sorgulaBtn" onclick="sorgula()">Sorgula</button>
+  </div>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    Sorgulanıyor...
+  </div>
+  <div class="error" id="error"></div>
+  <div class="result" id="result">
+    <div class="result-row">
+      <span class="result-label">Gonderi No</span>
+      <span class="result-value" id="resGonderiNo"></span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Ad Soyad</span>
+      <span class="result-value" id="resAdSoyad"></span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Telefon</span>
+      <span class="result-value phone" id="resTelefon"></span>
+    </div>
+    <a class="call-btn" id="callBtn" href="#">Ara</a>
+  </div>
+</div>
+<script>
+  document.getElementById("gonderiNo").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") sorgula();
+  });
+  async function sorgula() {
+    const gonderiNo = document.getElementById("gonderiNo").value.trim().replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+    if (!gonderiNo || gonderiNo.length < 6) { gosterHata("Gecerli bir gonderi numarasi girin."); return; }
+    document.getElementById("result").classList.remove("show");
+    document.getElementById("error").classList.remove("show");
+    document.getElementById("loading").classList.add("show");
+    document.getElementById("sorgulaBtn").disabled = true;
+    try {
+      const res = await fetch("/sorgula", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gonderiNo })
+      });
+      const data = await res.json();
+      if (data.hata) { gosterHata(data.hata); return; }
+      document.getElementById("resGonderiNo").textContent = gonderiNo;
+      document.getElementById("resAdSoyad").textContent = data.adSoyad || "Bulunamadi";
+      document.getElementById("resTelefon").textContent = data.telefon || "Bulunamadi";
+      const callBtn = document.getElementById("callBtn");
+      if (data.telefon) { callBtn.href = "tel:" + data.telefon; callBtn.style.display = "block"; }
+      else { callBtn.style.display = "none"; }
+      document.getElementById("result").classList.add("show");
+    } catch (e) {
+      gosterHata("Sunucu hatasi, tekrar deneyin.");
+    } finally {
+      document.getElementById("loading").classList.remove("show");
+      document.getElementById("sorgulaBtn").disabled = false;
+    }
+  }
+  function gosterHata(mesaj) {
+    document.getElementById("loading").classList.remove("show");
+    document.getElementById("sorgulaBtn").disabled = false;
+    const err = document.getElementById("error");
+    err.textContent = mesaj;
+    err.classList.add("show");
+  }
+</script>
+</body>
+</html>
