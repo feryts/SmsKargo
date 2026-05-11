@@ -73,25 +73,15 @@ async function gonderiGetir(gonderiNo) {
 
 const cache = {};
 
-// Saatte bir cache temizle
 setInterval(() => {
   const simdi = Date.now();
-  let temizlenen = 0;
   for (const key in cache) {
-    if (simdi - cache[key].zaman > 3600000) {
-      delete cache[key];
-      temizlenen++;
-    }
+    if (simdi - cache[key].zaman > 3600000) delete cache[key];
   }
-  if (temizlenen > 0) console.log("Cache temizlendi:", temizlenen, "kayit silindi");
+  console.log("Cache temizlendi");
 }, 3600000);
 
-// Uyku modunu engelle - kendi kendine ping
-setInterval(async () => {
-  try {
-    await axios.get("https://sms-kargo.vercel.app/");
-  } catch (e) {}
-}, 5 * 60 * 1000);
+app.get("/ping", (req, res) => res.send("ok"));
 
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
