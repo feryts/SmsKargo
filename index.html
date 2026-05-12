@@ -358,8 +358,9 @@ async function sorgula(){
     document.getElementById("radr").textContent = data.adres || "Adres bilgisi yok";
 
     const warnbox = document.getElementById("warnbox");
-    if (data.adresDegisikligi) {
-      document.getElementById("warntext").textContent = data.adresDegisikligi;
+    // BURASI DÜZELTİLDİ: Artık doğrudan Node.js'ten gelen "adresDegisiklik" adıyla kontrol ediliyor.
+    if (data.adresDegisiklik) {
+      document.getElementById("warntext").textContent = data.adresDegisiklik;
       warnbox.classList.add("show");
     } else {
       warnbox.classList.remove("show");
