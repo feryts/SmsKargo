@@ -90,10 +90,21 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 .rval.name{font-size:20px;font-weight:700}
 .rval.adres{font-size:14px;font-weight:500;color:var(--adres);line-height:1.6}
 
-.warn-box{display:none;margin-top:8px;background:rgba(255,140,66,.08);border:1px solid rgba(255,140,66,.3);border-radius:10px;padding:10px 12px}
+/* ADRES DEĞİŞİKLİĞİ ÖZEL TASARIMI */
+.warn-box{display:none;margin-top:10px;background:rgba(255,140,66,.08);border:1px solid rgba(255,140,66,.3);border-radius:12px;padding:14px}
 .warn-box.show{display:block}
-.warn-title{font-size:9px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:1.5px;font-family:'DM Mono',monospace;margin-bottom:5px;display:flex;align-items:center;gap:4px}
-.warn-text{font-size:12px;color:var(--warn);line-height:1.5;opacity:.9}
+.warn-title{font-size:10px;font-weight:800;color:var(--warn);text-transform:uppercase;letter-spacing:1.5px;font-family:'DM Mono',monospace;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.warn-text{font-size:12px;color:var(--warn);line-height:1.5;}
+
+.adres-degisim-kapsayici { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.adres-kutu { background: rgba(0,0,0,0.04); border-radius: 8px; padding: 10px; border-left: 4px solid transparent; }
+[data-theme="dark"] .adres-kutu, [data-theme="night"] .adres-kutu, [data-theme="sunset"] .adres-kutu, [data-theme="ocean"] .adres-kutu, [data-theme="colorful"] .adres-kutu { background: rgba(255,255,255,0.06); }
+.adres-kutu.eski { border-color: #ff6b6b; }
+.adres-kutu.yeni { border-color: #51cf66; }
+.ak-baslik { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; margin-bottom: 4px; display: inline-block; font-family:'DM Mono',monospace; }
+.adres-kutu.eski .ak-baslik { color: #ff6b6b; }
+.adres-kutu.yeni .ak-baslik { color: #51cf66; }
+.ak-metin { font-size: 13px; color: var(--text); line-height: 1.5; font-weight: 500;}
 
 .prow{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .pinfo{display:flex;flex-direction:column;gap:3px;min-width:0}
@@ -177,7 +188,7 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
       <div class="rval adres" id="radr"></div>
       <div class="warn-box" id="warnbox">
         <div class="warn-title">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
           Adres Degisikligi
         </div>
         <div class="warn-text" id="warntext"></div>
@@ -206,7 +217,7 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 </div>
 
 <script>
-// Güvenli Depolama Sistemi (Hataları önler)
+// Güvenli Depolama Sistemi
 const storage = {
   get: function(k) { try { return localStorage.getItem(k); } catch(e) { return null; } },
   set: function(k, v) { try { localStorage.setItem(k, v); } catch(e) {} },
@@ -283,7 +294,7 @@ function gsayac(){
 }
 setInterval(gsayac, 1000); gsayac();
 
-// Arama Kutusu ve Butonlar
+// Arama Kutusu
 const noInput = document.getElementById("no");
 if(noInput) {
     noInput.addEventListener("keydown", e => { if(e.key === "Enter") sorgula(); });
@@ -323,6 +334,41 @@ function kopyala(){
   });
 }
 
+// ADRES DEĞİŞİKLİĞİ METNİNİ ŞIKLAŞTIRAN FONKSİYON
+function adresKutularinaAyir(metin) {
+  try {
+    if(metin.includes("ESKİ ADRES") && metin.includes("YENİ ADRES")) {
+      let baslik = metin.split("ESKİ ADRES")[0].replace(/[\.,\s]+$/, '');
+      let kalan = metin.substring(metin.indexOf("ESKİ ADRES"));
+      
+      let eski_match = kalan.match(/ESKİ ADRES\s*[:=]?\s*(.*?)(?=\s*,?\s*YENİ ADRES|$)/i);
+      let yeni_match = kalan.match(/YENİ ADRES\s*[:=]?\s*(.*)/i);
+      
+      let eski_metin = eski_match ? eski_match[1].trim() : "";
+      let yeni_metin = yeni_match ? yeni_match[1].trim() : "";
+
+      if (eski_metin && yeni_metin) {
+        return `
+          <div style="opacity:0.9; margin-bottom:4px;">${baslik}</div>
+          <div class="adres-degisim-kapsayici">
+              <div class="adres-kutu eski">
+                  <div class="ak-baslik">ESKİ ADRES</div>
+                  <div class="ak-metin">${eski_metin}</div>
+              </div>
+              <div class="adres-kutu yeni">
+                  <div class="ak-baslik">YENİ ADRES</div>
+                  <div class="ak-metin">${yeni_metin}</div>
+              </div>
+          </div>
+        `;
+      }
+    }
+  } catch(e) {}
+  
+  // Eğer düzgün ayrılamazsa metni orijinal halinde bırak
+  return metin;
+}
+
 async function sorgula(){
   const noEl = document.getElementById("no");
   if(!noEl) return;
@@ -358,9 +404,9 @@ async function sorgula(){
     document.getElementById("radr").textContent = data.adres || "Adres bilgisi yok";
 
     const warnbox = document.getElementById("warnbox");
-    // BURASI DÜZELTİLDİ: Artık doğrudan Node.js'ten gelen "adresDegisiklik" adıyla kontrol ediliyor.
     if (data.adresDegisiklik) {
-      document.getElementById("warntext").textContent = data.adresDegisiklik;
+      // Düz metni şık kutulara çevirerek ekliyoruz
+      document.getElementById("warntext").innerHTML = adresKutularinaAyir(data.adresDegisiklik);
       warnbox.classList.add("show");
     } else {
       warnbox.classList.remove("show");
@@ -400,7 +446,6 @@ function hata(mesaj) {
   }
 }
 
-// Service Worker önbelleğini temizle (eski bozuk kodun takılı kalmasını önler)
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(function(registrations) {
     for(let registration of registrations) {
