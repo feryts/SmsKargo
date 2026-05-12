@@ -150,6 +150,10 @@
   }
   .result-value { font-size: 17px; font-weight: 600; color: var(--text); }
   .result-value.name { font-size: 20px; font-weight: 700; }
+  .result-value.adres {
+    font-size: 13px; font-weight: 400; color: var(--text2);
+    line-height: 1.5; letter-spacing: 0.2px;
+  }
 
   .phone-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .phone-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
@@ -171,16 +175,15 @@
     background: rgba(77,184,77,0.07); text-decoration: none; gap: 3px;
   }
   .action-btn:active { transform: scale(0.88); background: rgba(77,184,77,0.15); }
-
+  .action-btn svg { width: 22px; height: 22px; }
+  .action-btn .btn-label {
+    font-size: 8px; font-weight: 700; letter-spacing: 0.5px;
+    font-family: 'Outfit', sans-serif; color: var(--text2);
+  }
   .action-btn.copy { color: var(--accent); }
-  .action-btn.copy svg { width: 22px; height: 22px; }
-  .action-btn.copy .btn-label { font-size: 8px; font-weight: 700; letter-spacing: 0.5px; font-family: 'Outfit', sans-serif; color: var(--text2); }
   .action-btn.copy.copied { color: var(--success); border-color: var(--success); background: rgba(76,175,80,0.1); }
   .action-btn.copy.copied .btn-label { color: var(--success); }
-
   .action-btn.call { color: var(--accent); }
-  .action-btn.call svg { width: 22px; height: 22px; }
-  .action-btn.call .btn-label { font-size: 8px; font-weight: 700; letter-spacing: 0.5px; font-family: 'Outfit', sans-serif; color: var(--text2); }
 
   .loading { display: none; text-align: center; padding: 20px; color: var(--text2); font-size: 13px; letter-spacing: 1px; }
   .loading.show { display: block; }
@@ -249,6 +252,10 @@
     <div class="result-row">
       <div class="result-label">Ad Soyad</div>
       <div class="result-value name" id="resAdSoyad"></div>
+    </div>
+    <div class="result-row">
+      <div class="result-label">Adres</div>
+      <div class="result-value adres" id="resAdres"></div>
     </div>
     <div class="result-row">
       <div class="result-label">Telefon</div>
@@ -339,6 +346,7 @@
       if (data.hata) { gosterHata(data.hata); return; }
       document.getElementById("resGonderiNo").textContent = gonderiNo;
       document.getElementById("resAdSoyad").textContent = data.adSoyad || "Bulunamadi";
+      document.getElementById("resAdres").textContent = data.adres || "Bulunamadi";
       const tel = data.telefon || "";
       document.getElementById("resTelefon").textContent = tel;
       document.getElementById("resTelefon4").textContent = tel.length >= 4 ? "Son 4: " + tel.slice(-4) : "";
