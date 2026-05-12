@@ -72,7 +72,6 @@
     width: 90vw; max-width: 500px;
     opacity: var(--logo-opacity);
     pointer-events: none; z-index: 0;
-    filter: grayscale(20%) saturate(1.5);
   }
 
   .container {
@@ -80,77 +79,45 @@
     display: flex; flex-direction: column; gap: 10px;
     position: relative; z-index: 1;
     padding-top: 14vh;
-    transition: padding-top 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: padding-top 0.5s cubic-bezier(0.4,0,0.2,1);
   }
   .container.compact { padding-top: 5vh; }
 
-  .header {
-    text-align: center;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    margin-bottom: 8px;
-  }
-  .header .custom-logo {
-    max-width: 160px; height: auto;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    display: block; margin: 0 auto 10px;
-  }
-  .header .kg-label {
-    font-size: 26px; font-weight: 800; letter-spacing: 6px; color: var(--accent);
-    text-transform: uppercase; display: block;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); line-height: 1.1;
-  }
-  .header h1 {
-    font-size: 13px; font-weight: 400; letter-spacing: 3px; color: var(--text2);
-    text-transform: uppercase;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); margin-top: 6px;
-  }
+  .header { text-align: center; transition: all 0.5s cubic-bezier(0.4,0,0.2,1); margin-bottom: 8px; }
+  .header .custom-logo { max-width: 160px; height: auto; transition: all 0.5s cubic-bezier(0.4,0,0.2,1); display: block; margin: 0 auto 10px; }
+  .header .kg-label { font-size: 26px; font-weight: 800; letter-spacing: 6px; color: var(--accent); text-transform: uppercase; display: block; transition: all 0.5s cubic-bezier(0.4,0,0.2,1); line-height: 1.1; }
+  .header h1 { font-size: 13px; font-weight: 400; letter-spacing: 3px; color: var(--text2); text-transform: uppercase; transition: all 0.5s cubic-bezier(0.4,0,0.2,1); margin-top: 6px; }
   .header.compact .custom-logo { max-width: 60px; margin-bottom: 5px; }
   .header.compact .kg-label { font-size: 14px; letter-spacing: 4px; }
   .header.compact h1 { font-size: 9px; letter-spacing: 2px; margin-top: 2px; }
 
-  .card {
-    background: var(--card); border-radius: 18px; padding: 18px;
-    border: 1px solid var(--border); box-shadow: 0 8px 32px var(--shadow);
-  }
-  label {
-    display: block; font-size: 10px; font-weight: 600; color: var(--accent);
-    text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;
-    font-family: 'DM Mono', monospace;
-  }
+  .card { background: var(--card); border-radius: 18px; padding: 18px; border: 1px solid var(--border); box-shadow: 0 8px 32px var(--shadow); }
+  label { display: block; font-size: 10px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-family: 'DM Mono', monospace; }
 
   .input-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: stretch; }
   input {
-    flex: 1; min-width: 0;
-    background: var(--bg); border: 1.5px solid var(--border);
+    flex: 1; min-width: 0; background: var(--bg); border: 1.5px solid var(--border);
     border-radius: 12px; padding: 13px 14px; font-size: 16px;
     font-family: 'DM Mono', monospace; color: var(--text);
     outline: none; transition: border-color 0.2s, box-shadow 0.2s;
   }
-  [data-theme="colorful"] input,
-  [data-theme="night"] input,
-  [data-theme="sunset"] input,
-  [data-theme="ocean"] input { background: rgba(0,0,0,0.3); }
   input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(77,184,77,0.12); }
   input::placeholder { color: var(--text2); font-size: 12px; opacity: 0.7; font-family: 'Outfit', sans-serif; }
 
   .paste-btn {
-    flex-shrink: 0;
-    background: var(--btn-bg); border: 1.5px solid var(--border); border-radius: 12px;
+    flex-shrink: 0; background: var(--btn-bg); border: 1.5px solid var(--border); border-radius: 12px;
     padding: 0 14px; color: var(--accent); font-size: 12px; font-weight: 700;
-    font-family: 'Outfit', sans-serif;
-    cursor: pointer; white-space: nowrap; transition: all 0.2s;
-    display: flex; align-items: center; gap: 5px;
+    font-family: 'Outfit', sans-serif; cursor: pointer; white-space: nowrap;
+    transition: all 0.2s; display: flex; align-items: center; gap: 5px;
   }
-  .paste-btn:active { transform: scale(0.95); opacity: 0.8; }
+  .paste-btn:active { transform: scale(0.95); }
 
-  /* BUTON SATIRI */
   .btn-row { display: flex; gap: 8px; }
   .sorgu-btn {
     flex: 1; background: var(--accent); color: #fff; border: none;
     border-radius: 12px; padding: 15px; font-size: 15px; font-weight: 700;
     font-family: 'Outfit', sans-serif; letter-spacing: 1.5px;
-    cursor: pointer; transition: all 0.2s;
-    box-shadow: 0 4px 20px rgba(77,184,77,0.35);
+    cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 20px rgba(77,184,77,0.35);
   }
   .sorgu-btn:active { transform: scale(0.98); background: var(--accent2); }
   .sorgu-btn:disabled { background: var(--border); color: var(--text2); cursor: not-allowed; box-shadow: none; }
@@ -163,126 +130,64 @@
   }
   .gecmis-btn:active { transform: scale(0.95); }
 
-  /* GEÇMİŞ PANELİ */
   .gecmis-panel {
-    background: var(--card); border-radius: 18px; padding: 0;
-    border: 1px solid var(--border); box-shadow: 0 8px 32px var(--shadow);
-    display: none; overflow: hidden;
-    max-height: 0; transition: max-height 0.3s ease;
-  }
-  .gecmis-panel.show { display: block; max-height: 400px; }
-  .gecmis-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 18px; border-bottom: 1px solid var(--border);
-  }
-  .gecmis-title {
-    font-size: 10px; font-weight: 700; color: var(--accent);
-    text-transform: uppercase; letter-spacing: 2px;
-    font-family: 'DM Mono', monospace;
-  }
-  .gecmis-timer {
-    font-size: 10px; color: var(--text2);
-    font-family: 'DM Mono', monospace;
-  }
-  .gecmis-liste { overflow-y: auto; max-height: 320px; }
-  .gecmis-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 18px; border-bottom: 1px solid var(--border);
-    cursor: pointer; transition: background 0.15s;
-  }
-  .gecmis-item:last-child { border-bottom: none; }
-  .gecmis-item:active { background: rgba(77,184,77,0.08); }
-  .gecmis-no {
-    font-size: 13px; font-weight: 600; color: var(--accent);
-    font-family: 'DM Mono', monospace; letter-spacing: 0.5px;
-  }
-  .gecmis-ad {
-    font-size: 13px; font-weight: 500; color: var(--text);
-    text-align: right; max-width: 55%;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .gecmis-bos {
-    padding: 24px; text-align: center;
-    font-size: 13px; color: var(--text2);
-  }
-
-  /* SONUÇ */
-  .result {
-    background: var(--card); border-radius: 18px; padding: 18px;
+    background: var(--card); border-radius: 18px; overflow: hidden;
     border: 1px solid var(--border); box-shadow: 0 8px 32px var(--shadow); display: none;
   }
+  .gecmis-panel.show { display: block; }
+  .gecmis-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .gecmis-title { font-size: 10px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; font-family: 'DM Mono', monospace; }
+  .gecmis-timer { font-size: 10px; color: var(--text2); font-family: 'DM Mono', monospace; }
+  .gecmis-liste { overflow-y: auto; max-height: 300px; }
+  .gecmis-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+  .gecmis-item:last-child { border-bottom: none; }
+  .gecmis-item:active { background: rgba(77,184,77,0.08); }
+  .gecmis-no { font-size: 13px; font-weight: 600; color: var(--accent); font-family: 'DM Mono', monospace; }
+  .gecmis-ad { font-size: 13px; font-weight: 500; color: var(--text); text-align: right; max-width: 55%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gecmis-bos { padding: 24px; text-align: center; font-size: 13px; color: var(--text2); }
+
+  .result { background: var(--card); border-radius: 18px; padding: 18px; border: 1px solid var(--border); box-shadow: 0 8px 32px var(--shadow); display: none; }
   .result.show { display: block; }
   .result-row { padding: 11px 0; border-bottom: 1px solid var(--border); }
   .result-row:last-child { border-bottom: none; padding-bottom: 0; }
   .result-row:first-child { padding-top: 0; }
-  .result-label {
-    font-size: 9px; color: var(--accent); text-transform: uppercase;
-    letter-spacing: 2px; font-weight: 600; margin-bottom: 4px;
-    font-family: 'DM Mono', monospace;
-  }
+  .result-label { font-size: 9px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 4px; font-family: 'DM Mono', monospace; }
   .result-value { font-size: 17px; font-weight: 600; color: var(--text); }
   .result-value.name { font-size: 20px; font-weight: 700; }
-  .result-value.adres {
-    font-size: 14px; font-weight: 500; color: var(--adres);
-    line-height: 1.6; letter-spacing: 0.3px;
-  }
+  .result-value.adres { font-size: 14px; font-weight: 500; color: var(--adres); line-height: 1.6; }
 
   .phone-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .phone-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-  .phone-number {
-    font-size: 22px; font-weight: 700; color: var(--accent);
-    letter-spacing: 1.5px; font-family: 'DM Mono', monospace;
-  }
-  .phone-last4 {
-    font-size: 11px; color: var(--text2); font-weight: 500;
-    font-family: 'DM Mono', monospace; letter-spacing: 1px;
-  }
+  .phone-number { font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: 1.5px; font-family: 'DM Mono', monospace; }
+  .phone-last4 { font-size: 11px; color: var(--text2); font-weight: 500; font-family: 'DM Mono', monospace; }
   .phone-actions { display: flex; gap: 10px; flex-shrink: 0; }
 
   .action-btn {
-    width: 52px; height: 52px; border-radius: 14px;
-    border: 1.5px solid rgba(77,184,77,0.25);
+    width: 52px; height: 52px; border-radius: 14px; border: 1.5px solid rgba(77,184,77,0.25);
     display: flex; align-items: center; justify-content: center; flex-direction: column;
-    cursor: pointer; transition: all 0.2s;
-    background: rgba(77,184,77,0.07); text-decoration: none; gap: 3px;
+    cursor: pointer; transition: all 0.2s; background: rgba(77,184,77,0.07);
+    text-decoration: none; gap: 3px; color: var(--accent);
   }
-  .action-btn:active { transform: scale(0.88); background: rgba(77,184,77,0.15); }
+  .action-btn:active { transform: scale(0.88); }
   .action-btn svg { width: 22px; height: 22px; }
-  .action-btn .btn-label {
-    font-size: 8px; font-weight: 700; letter-spacing: 0.5px;
-    font-family: 'Outfit', sans-serif; color: var(--text2);
-  }
-  .action-btn.copy { color: var(--accent); }
+  .action-btn .btn-label { font-size: 8px; font-weight: 700; letter-spacing: 0.5px; font-family: 'Outfit', sans-serif; color: var(--text2); }
   .action-btn.copy.copied { color: var(--success); border-color: var(--success); background: rgba(76,175,80,0.1); }
   .action-btn.copy.copied .btn-label { color: var(--success); }
-  .action-btn.call { color: var(--accent); }
 
-  .loading { display: none; text-align: center; padding: 20px; color: var(--text2); font-size: 13px; letter-spacing: 1px; }
+  .loading { display: none; text-align: center; padding: 20px; color: var(--text2); font-size: 13px; }
   .loading.show { display: block; }
-  .spinner {
-    width: 24px; height: 24px; border: 2px solid var(--border);
-    border-top-color: var(--accent); border-radius: 50%;
-    animation: spin 0.7s linear infinite; margin: 0 auto 10px;
-  }
+  .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 10px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .error {
-    display: none; background: var(--error-bg); border: 1px solid var(--error-border);
-    border-radius: 12px; padding: 12px 16px; color: var(--error-text);
-    font-size: 13px; text-align: center;
-  }
+  .error { display: none; background: var(--error-bg); border: 1px solid var(--error-border); border-radius: 12px; padding: 12px 16px; color: var(--error-text); font-size: 13px; text-align: center; }
   .error.show { display: block; }
 
-  /* TEMA */
   .theme-bar { display: flex; justify-content: center; gap: 10px; padding: 10px 0 4px; flex-wrap: wrap; }
-  .theme-dot {
-    width: 24px; height: 24px; border-radius: 50%;
-    border: 2px solid transparent; cursor: pointer; transition: all 0.25s;
-  }
+  .theme-dot { width: 26px; height: 26px; border-radius: 50%; border: 2.5px solid transparent; cursor: pointer; transition: all 0.25s; }
   .theme-dot:active { transform: scale(0.82); }
-  .theme-dot.active { transform: scale(1.3); border-color: var(--text); }
-  .theme-dot.dark { background: radial-gradient(circle at 35% 35%, #1a2a1a, #080e08); }
-  .theme-dot.light { background: radial-gradient(circle at 35% 35%, #ffffff, #cce8cc); }
+  .theme-dot.active { transform: scale(1.3); border-color: var(--text) !important; }
+  .theme-dot.dark { background: radial-gradient(circle at 35% 35%, #1a2a1a, #080e08); border-color: #4db84d; }
+  .theme-dot.light { background: radial-gradient(circle at 35% 35%, #ffffff, #cce8cc); border-color: #3da83d; }
   .theme-dot.colorful { background: linear-gradient(135deg, #4db84d, #00e676, #0a2010); }
   .theme-dot.night { background: linear-gradient(135deg, #7070ff, #1a1a4a, #0a0a1a); }
   .theme-dot.sunset { background: linear-gradient(135deg, #ff8c42, #cc4400, #1a0a05); }
@@ -294,7 +199,6 @@
 <img class="bg-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Kolay_Gelsin_logo.png/800px-Kolay_Gelsin_logo.png" alt="" onerror="this.style.display='none'">
 
 <div class="container" id="container">
-
   <div class="header" id="header">
     <img class="custom-logo" src="https://raw.githubusercontent.com/feryts/SmsKargo/main/logo.png" alt="Logo" onerror="this.style.display='none'">
     <span class="kg-label">KOLAY GELSİN</span>
@@ -312,18 +216,17 @@
     </div>
     <div class="btn-row">
       <button class="sorgu-btn" id="sorgulaBtn" onclick="sorgula()">SORGULA</button>
-      <button class="gecmis-btn" onclick="gecmisToggle()">
+      <button class="gecmis-btn" id="gecmisBtn" onclick="gecmisToggle()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
         GEÇMİŞ
       </button>
     </div>
   </div>
 
-  <!-- GEÇMİŞ PANELİ -->
   <div class="gecmis-panel" id="gecmisPanel">
     <div class="gecmis-header">
       <span class="gecmis-title">Sorgu Geçmişi</span>
-      <span class="gecmis-timer" id="gecmisTimer">Sıfırlanma: 3:00:00</span>
+      <span class="gecmis-timer" id="gecmisTimer"></span>
     </div>
     <div class="gecmis-liste" id="gecmisListe"></div>
   </div>
@@ -377,62 +280,59 @@
     <button class="theme-dot sunset" onclick="temaAyarla('sunset')" title="Gunbatimi"></button>
     <button class="theme-dot ocean" onclick="temaAyarla('ocean')" title="Okyanus"></button>
   </div>
-
 </div>
+
 <script>
   // TEMA
-  const kaydedilmis = localStorage.getItem("tema") || "dark";
-  temaAyarla(kaydedilmis);
-
   function temaAyarla(tema) {
     document.documentElement.setAttribute("data-theme", tema);
     localStorage.setItem("tema", tema);
     document.querySelectorAll(".theme-dot").forEach(b => b.classList.remove("active"));
-    document.querySelector(".theme-dot." + tema)?.classList.add("active");
+    const dot = document.querySelector(".theme-dot." + tema);
+    if (dot) dot.classList.add("active");
   }
+  temaAyarla(localStorage.getItem("tema") || "dark");
 
   // GEÇMİŞ
   const GECMIS_KEY = "sorgu_gecmis";
   const GECMIS_ZAMAN_KEY = "sorgu_gecmis_zaman";
-  const GECMIS_SURE = 3 * 60 * 60 * 1000; // 3 saat
+  const GECMIS_SURE = 3 * 60 * 60 * 1000;
 
   function gecmisAl() {
     const zaman = parseInt(localStorage.getItem(GECMIS_ZAMAN_KEY) || "0");
-    if (Date.now() - zaman > GECMIS_SURE) {
+    if (zaman && Date.now() - zaman > GECMIS_SURE) {
       localStorage.removeItem(GECMIS_KEY);
       localStorage.setItem(GECMIS_ZAMAN_KEY, Date.now().toString());
       return [];
     }
     try { return JSON.parse(localStorage.getItem(GECMIS_KEY) || "[]"); }
-    catch (e) { return []; }
+    catch(e) { return []; }
   }
 
-  function gecmisEkle(gonderiNo, adSoyad) {
-    const liste = gecmisAl();
-    const mevcut = liste.findIndex(g => g.no === gonderiNo);
-    if (mevcut >= 0) liste.splice(mevcut, 1);
-    liste.unshift({ no: gonderiNo, ad: adSoyad });
-    if (liste.length > 50) liste.pop();
+  function gecmisEkle(no, ad) {
+    let liste = gecmisAl();
+    liste = liste.filter(g => g.no !== no);
+    liste.unshift({ no, ad });
+    if (liste.length > 50) liste = liste.slice(0, 50);
     localStorage.setItem(GECMIS_KEY, JSON.stringify(liste));
     if (!localStorage.getItem(GECMIS_ZAMAN_KEY)) {
       localStorage.setItem(GECMIS_ZAMAN_KEY, Date.now().toString());
     }
-    gecmisGuncelle();
   }
 
   function gecmisGuncelle() {
     const liste = gecmisAl();
     const el = document.getElementById("gecmisListe");
-    if (liste.length === 0) {
+    if (!liste.length) {
       el.innerHTML = '<div class="gecmis-bos">Henüz sorgu yapılmadı</div>';
       return;
     }
-    el.innerHTML = liste.map(g => `
-      <div class="gecmis-item" onclick="gecmisSec('${g.no}')">
+    el.innerHTML = liste.map(g =>
+      `<div class="gecmis-item" onclick="gecmisSec('${g.no}')">
         <span class="gecmis-no">${g.no}</span>
         <span class="gecmis-ad">${g.ad || ""}</span>
-      </div>
-    `).join("");
+      </div>`
+    ).join("");
   }
 
   function gecmisSec(no) {
@@ -451,7 +351,31 @@
     }
   }
 
-  // GEÇMİŞ SAYACI
-  function gecmisSayacGuncelle() {
-    const zaman = parseInt(localStorage.getItem(GECMIS_ZAMAN_KEY) || Date.now().toString());
-    const kalan = GECMIS_SURE - (Date.
+  function gecmisSayac() {
+    const zaman = parseInt(localStorage.getItem(GECMIS_ZAMAN_KEY) || "0");
+    if (!zaman) { document.getElementById("gecmisTimer").textContent = ""; return; }
+    const kalan = GECMIS_SURE - (Date.now() - zaman);
+    if (kalan <= 0) {
+      localStorage.removeItem(GECMIS_KEY);
+      localStorage.setItem(GECMIS_ZAMAN_KEY, Date.now().toString());
+      document.getElementById("gecmisTimer").textContent = "Sıfırlandı";
+      gecmisGuncelle();
+      return;
+    }
+    const s = Math.floor(kalan / 3600000);
+    const d = Math.floor((kalan % 3600000) / 60000);
+    const sn = Math.floor((kalan % 60000) / 1000);
+    document.getElementById("gecmisTimer").textContent =
+      `${s}:${String(d).padStart(2,"0")}:${String(sn).padStart(2,"0")}`;
+  }
+  setInterval(gecmisSayac, 1000);
+  gecmisSayac();
+
+  // INPUT
+  document.getElementById("gonderiNo").addEventListener("keydown", e => {
+    if (e.key === "Enter") sorgula();
+  });
+  document.getElementById("gonderiNo").addEventListener("input", function() {
+    if (!this.value) {
+      document.getElementById("header").classList.remove("compact");
+      docu
