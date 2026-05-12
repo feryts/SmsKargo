@@ -62,9 +62,9 @@ async function gonderiGetir(gonderiNo) {
   const adSoyad = shipment.RecipientName || "";
   const shipmentId = shipment.ShipmentId;
 
+  // Detay - telefon ve adres
   const r3 = await axios.post(API_BASE + "/GetShipmentById", { ShipmentId: shipmentId }, { headers });
   const detay = r3.data?.Payload;
-
   const gsm = detay?.Recipient?.Gsm || "";
   let telefon = "";
   if (gsm.startsWith("5") && gsm.length === 10) telefon = "0" + gsm;
@@ -75,7 +75,18 @@ async function gonderiGetir(gonderiNo) {
   const il = detay?.Recipient?.Address?.CityName || "";
   const adres = [adresText, ilce, il].filter(Boolean).join(" / ");
 
-  return { adSoyad, telefon, adres };
+  // Adres değişikliği kontrolü
+  let adresDegisiklik = null;
+  try {
+    const r4 = await axios.post(API_BASE + "/GetShipmentEvents", { ShipmentId: shipmentId }, { headers });
+    const events = r4.data?.Payload || [];
+    const adresEvent = events.find(e => e.CargoEventType === 27);
+    if (adresEvent) adresDegisiklik = adresEvent.Description;
+  } catch (e) {
+    console.log("Events alinamadi:", e.message);
+  }
+
+  return { adSoyad, telefon, adres, adresDegisiklik };
 }
 
 const cache = {};
