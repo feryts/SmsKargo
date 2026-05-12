@@ -378,4 +378,80 @@
   document.getElementById("gonderiNo").addEventListener("input", function() {
     if (!this.value) {
       document.getElementById("header").classList.remove("compact");
-      docu
+      document.getElementById("container").classList.remove("compact");
+      document.getElementById("result").classList.remove("show");
+      document.getElementById("error").classList.remove("show");
+    }
+  });
+
+  async function yapistir() {
+    try {
+      const text = await navigator.clipboard.readText();
+      const temiz = text.trim().replace(/[^a-zA-Z0-9]/g, "");
+      if (temiz) { document.getElementById("gonderiNo").value = temiz; sorgula(); }
+    } catch(e) { document.getElementById("gonderiNo").focus(); }
+  }
+
+  function kopyalaSon4() {
+    const tel = document.getElementById("resTelefon").textContent;
+    if (!tel) return;
+    navigator.clipboard.writeText(tel.slice(-4)).then(() => {
+      const btn = document.getElementById("copyBtn");
+      const lbl = document.getElementById("copyLabel");
+      btn.classList.add("copied");
+      lbl.textContent = "✓";
+      setTimeout(() => { btn.classList.remove("copied"); lbl.textContent = "SON 4"; }, 2000);
+    });
+  }
+
+  async function sorgula() {
+    const gonderiNo = document.getElementById("gonderiNo").value.trim().replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
+    if (!gonderiNo || gonderiNo.length < 6) { gosterHata("Gecerli bir numara girin."); return; }
+    document.getElementById("gecmisPanel").classList.remove("show");
+    document.getElementById("result").classList.remove("show");
+    document.getElementById("error").classList.remove("show");
+    document.getElementById("loading").classList.add("show");
+    document.getElementById("sorgulaBtn").disabled = true;
+    try {
+      const res = await fetch("/sorgula", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gonderiNo })
+      });
+      const data = await res.json();
+      if (data.hata) { gosterHata(data.hata); return; }
+      document.getElementById("resGonderiNo").textContent = gonderiNo;
+      document.getElementById("resAdSoyad").textContent = data.adSoyad || "Bulunamadi";
+      document.getElementById("resAdres").textContent = data.adres || "Bulunamadi";
+      const tel = data.telefon || "";
+      document.getElementById("resTelefon").textContent = tel;
+      document.getElementById("resTelefon4").textContent = tel.length >= 4 ? "Son 4: " + tel.slice(-4) : "";
+      const callBtn = document.getElementById("callBtn");
+      if (tel) { callBtn.href = "tel:" + tel; callBtn.style.display = "flex"; }
+      else { callBtn.style.display = "none"; }
+      document.getElementById("header").classList.add("compact");
+      document.getElementById("container").classList.add("compact");
+      document.getElementById("result").classList.add("show");
+      gecmisEkle(gonderiNo, data.adSoyad || "");
+    } catch(e) {
+      gosterHata("Sunucu hatasi, tekrar deneyin.");
+    } finally {
+      document.getElementById("loading").classList.remove("show");
+      document.getElementById("sorgulaBtn").disabled = false;
+    }
+  }
+
+  function gosterHata(mesaj) {
+    document.getElementById("loading").classList.remove("show");
+    document.getElementById("sorgulaBtn").disabled = false;
+    const err = document.getElementById("error");
+    err.textContent = mesaj;
+    err.classList.add("show");
+  }
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
+</script>
+</body>
+</html>
