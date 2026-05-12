@@ -80,41 +80,41 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 .gad{font-size:13px;font-weight:500;color:var(--text);text-align:right;max-width:55%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gbos{padding:24px;text-align:center;font-size:13px;color:var(--text2)}
 
-.result{background:var(--card);border-radius:18px;padding:18px;border:1px solid var(--border);box-shadow:0 8px 32px var(--shadow);display:none}
+.result{background:var(--card);border-radius:18px;padding:18px;border:1px solid var(--border);box-shadow:0 8px 32px var(--shadow);display:none; width: 100%;}
 .result.show{display:block}
-.rrow{padding:11px 0;border-bottom:1px solid var(--border)}
+.rrow{padding:11px 0;border-bottom:1px solid var(--border); width: 100%;}
 .rrow:last-child{border-bottom:none;padding-bottom:0}
 .rrow:first-child{padding-top:0}
 .rlabel{font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:4px;font-family:'DM Mono',monospace}
-.rval{font-size:17px;font-weight:600;color:var(--text)}
-.rval.name{font-size:20px;font-weight:700}
-.rval.adres{font-size:14px;font-weight:500;color:var(--adres);line-height:1.6}
+.rval{font-size:14px;font-weight:600;color:var(--text); word-break: break-word;}
+.rval.name{font-size:16px;font-weight:700;}
+.rval.adres{font-size:13px;font-weight:500;color:var(--adres);line-height:1.5;}
 
 /* ADRES DEĞİŞİKLİĞİ ÖZEL TASARIMI */
-.warn-box{display:none;margin-top:10px;background:rgba(255,140,66,.08);border:1px solid rgba(255,140,66,.3);border-radius:12px;padding:14px}
+.warn-box{display:none;margin-top:10px;background:rgba(255,140,66,.08);border:1px solid rgba(255,140,66,.3);border-radius:12px;padding:12px}
 .warn-box.show{display:block}
 .warn-title{font-size:10px;font-weight:800;color:var(--warn);text-transform:uppercase;letter-spacing:1.5px;font-family:'DM Mono',monospace;margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .warn-text{font-size:12px;color:var(--warn);line-height:1.5;}
 
 .adres-degisim-kapsayici { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-.adres-kutu { background: rgba(0,0,0,0.04); border-radius: 8px; padding: 10px; border-left: 4px solid transparent; }
+.adres-kutu { background: rgba(0,0,0,0.04); border-radius: 8px; padding: 10px; border-left: 4px solid transparent; width: 100%;}
 [data-theme="dark"] .adres-kutu, [data-theme="night"] .adres-kutu, [data-theme="sunset"] .adres-kutu, [data-theme="ocean"] .adres-kutu, [data-theme="colorful"] .adres-kutu { background: rgba(255,255,255,0.06); }
 .adres-kutu.eski { border-color: #ff6b6b; }
 .adres-kutu.yeni { border-color: #51cf66; }
 .ak-baslik { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; margin-bottom: 4px; display: inline-block; font-family:'DM Mono',monospace; }
 .adres-kutu.eski .ak-baslik { color: #ff6b6b; }
 .adres-kutu.yeni .ak-baslik { color: #51cf66; }
-.ak-metin { font-size: 13px; color: var(--text); line-height: 1.5; font-weight: 500;}
+.ak-metin { font-size: 11px; color: var(--text); line-height: 1.4; font-weight: 500; word-break: break-word;}
 
-.prow{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.pinfo{display:flex;flex-direction:column;gap:3px;min-width:0}
-.pnum{font-size:22px;font-weight:700;color:var(--accent);letter-spacing:1.5px;font-family:'DM Mono',monospace}
-.p4{font-size:11px;color:var(--text2);font-weight:500;font-family:'DM Mono',monospace}
-.pacts{display:flex;gap:10px;flex-shrink:0}
-.abtn{width:52px;height:52px;border-radius:14px;border:1.5px solid rgba(77,184,77,.25);display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;transition:all .2s;background:rgba(77,184,77,.07);text-decoration:none;gap:3px;color:var(--accent)}
+.prow{display:flex;align-items:center;justify-content:space-between;gap:8px; width: 100%;}
+.pinfo{display:flex;flex-direction:column;gap:3px;min-width:0; flex: 1;}
+.pnum{font-size:18px;font-weight:700;color:var(--text);letter-spacing:1px;font-family:'DM Mono',monospace; word-break: break-word;}
+.p4{font-size:10px;color:var(--text2);font-weight:500;font-family:'DM Mono',monospace;}
+.pacts{display:flex;gap:8px;flex-shrink:0}
+.abtn{width:46px;height:46px;border-radius:12px;border:1.5px solid rgba(77,184,77,.25);display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;transition:all .2s;background:rgba(77,184,77,.07);text-decoration:none;gap:2px;color:var(--accent)}
 .abtn:active{transform:scale(.88)}
-.abtn svg{width:22px;height:22px}
-.abtn .bl{font-size:8px;font-weight:700;letter-spacing:.5px;font-family:'Outfit',sans-serif;color:var(--text2)}
+.abtn svg{width:18px;height:18px}
+.abtn .bl{font-size:7px;font-weight:700;letter-spacing:.5px;font-family:'Outfit',sans-serif;color:var(--text2)}
 .abtn.copied{color:var(--success);border-color:var(--success);background:rgba(76,175,80,.1)}
 .abtn.copied .bl{color:var(--success)}
 
@@ -365,7 +365,6 @@ function adresKutularinaAyir(metin) {
     }
   } catch(e) {}
   
-  // Eğer düzgün ayrılamazsa metni orijinal halinde bırak
   return metin;
 }
 
@@ -405,7 +404,6 @@ async function sorgula(){
 
     const warnbox = document.getElementById("warnbox");
     if (data.adresDegisiklik) {
-      // Düz metni şık kutulara çevirerek ekliyoruz
       document.getElementById("warntext").innerHTML = adresKutularinaAyir(data.adresDegisiklik);
       warnbox.classList.add("show");
     } else {
