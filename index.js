@@ -45,7 +45,6 @@ async function gonderiGetir(gonderiNo) {
   };
 
   let shipment = null;
-
   if (gonderiNo.length > 15) {
     const r = await axios.post(API_BASE + "/GetShipments", { CustomerBarcode: gonderiNo, PageSize: 10, PageNumber: 1 }, { headers });
     shipment = r.data?.Payload?.ResultList?.[0];
@@ -64,11 +63,19 @@ async function gonderiGetir(gonderiNo) {
   const shipmentId = shipment.ShipmentId;
 
   const r3 = await axios.post(API_BASE + "/GetShipmentById", { ShipmentId: shipmentId }, { headers });
-  const gsm = r3.data?.Payload?.Recipient?.Gsm || "";
+  const detay = r3.data?.Payload;
+
+  const gsm = detay?.Recipient?.Gsm || "";
   let telefon = "";
   if (gsm.startsWith("5") && gsm.length === 10) telefon = "0" + gsm;
   else if (gsm.startsWith("05") && gsm.length === 11) telefon = gsm;
-  return { adSoyad, telefon };
+
+  const adresText = detay?.Recipient?.Address?.AddressText || "";
+  const ilce = detay?.Recipient?.Address?.TownName || "";
+  const il = detay?.Recipient?.Address?.CityName || "";
+  const adres = [adresText, ilce, il].filter(Boolean).join(" / ");
+
+  return { adSoyad, telefon, adres };
 }
 
 const cache = {};
