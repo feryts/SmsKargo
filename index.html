@@ -86,7 +86,8 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 .rrow:last-child{border-bottom:none;padding-bottom:0}
 .rrow:first-child{padding-top:0}
 .rlabel{font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:4px;font-family:'DM Mono',monospace}
-.rval{font-size:14px;font-weight:600;color:var(--text); word-break: break-word;}
+/* KELİME KIRMA (word-break) KALDIRILDI */
+.rval{font-size:14px;font-weight:600;color:var(--text);}
 .rval.name{font-size:16px;font-weight:700;}
 .rval.adres{font-size:13px;font-weight:500;color:var(--adres);line-height:1.5;}
 
@@ -104,11 +105,13 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 .ak-baslik { font-size: 10px; font-weight: 800; letter-spacing: 1.5px; margin-bottom: 4px; display: inline-block; font-family:'DM Mono',monospace; }
 .adres-kutu.eski .ak-baslik { color: #ff6b6b; }
 .adres-kutu.yeni .ak-baslik { color: #51cf66; }
-.ak-metin { font-size: 11px; color: var(--text); line-height: 1.4; font-weight: 500; word-break: break-word;}
+/* KELİME KIRMA KALDIRILDI */
+.ak-metin { font-size: 11px; color: var(--text); line-height: 1.4; font-weight: 500;}
 
 .prow{display:flex;align-items:center;justify-content:space-between;gap:8px; width: 100%;}
 .pinfo{display:flex;flex-direction:column;gap:3px;min-width:0; flex: 1;}
-.pnum{font-size:18px;font-weight:700;color:var(--text);letter-spacing:1px;font-family:'DM Mono',monospace; word-break: break-word;}
+/* KELİME KIRMA KALDIRILDI */
+.pnum{font-size:18px;font-weight:700;color:var(--text);letter-spacing:1px;font-family:'DM Mono',monospace;}
 .p4{font-size:10px;color:var(--text2);font-weight:500;font-family:'DM Mono',monospace;}
 .pacts{display:flex;gap:8px;flex-shrink:0}
 .abtn{width:46px;height:46px;border-radius:12px;border:1.5px solid rgba(77,184,77,.25);display:flex;align-items:center;justify-content:center;flex-direction:column;cursor:pointer;transition:all .2s;background:rgba(77,184,77,.07);text-decoration:none;gap:2px;color:var(--accent)}
