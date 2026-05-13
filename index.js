@@ -131,48 +131,32 @@ app.post("/barkod", async (req, res) => {
       "origin": "https://kurumsal.kolaygelsin.com",
     };
 
-    let etiketHtml = null;
+    // Hata dönse bile çökmemesi ve Kolay Gelsin'in cevabını okuyabilmemiz için validateStatus ekliyoruz
+    const r = await axios.post(API_BASE + "/GETSHIPMENTITEMLABELWITHPRINTTYPE", {
+      Barcode: shipmentItemId,
+      BarcodePrintType: 1,
+      IsReturnBarcode: false
+    }, { headers, validateStatus: () => true }); 
 
-    // Yöntem 1: Orijinal deneme (PrintType: 1)
-    try {
-      const r1 = await axios.post(API_BASE + "/GETSHIPMENTITEMLABELWITHPRINTTYPE", {
-        Barcode: shipmentItemId,
-        BarcodePrintType: 1,
-        IsReturnBarcode: false
-      }, { headers });
-      etiketHtml = r1.data?.Payload?.[0]?.ShipmentItemLabel;
-    } catch (e) { console.log("Yontem 1 basarisiz"); }
+    const data = r.data;
 
-    // Yöntem 2: PrintType: 0 (Bazen 1 hata verir, 0 düz HTML döner)
-    if (!etiketHtml) {
-      try {
-        const r2 = await axios.post(API_BASE + "/GETSHIPMENTITEMLABELWITHPRINTTYPE", {
-          Barcode: shipmentItemId,
-          BarcodePrintType: 0,
-          IsReturnBarcode: false
-        }, { headers });
-        etiketHtml = r2.data?.Payload?.[0]?.ShipmentItemLabel;
-      } catch (e) { console.log("Yontem 2 basarisiz"); }
+    // Etiket başarıyla geldiyse
+    if (data && data.Payload) {
+      let etiketHtml = Array.isArray(data.Payload) ? data.Payload[0]?.ShipmentItemLabel : data.Payload?.ShipmentItemLabel;
+      
+      if (etiketHtml) {
+        return res.json({ etiket: etiketHtml });
+      }
     }
 
-    // Yöntem 3: PrintType parametresi olmadan direkt düz etiket isteme
-    if (!etiketHtml) {
-      try {
-        const r3 = await axios.post(API_BASE + "/GetShipmentItemLabel", {
-          Barcode: shipmentItemId
-        }, { headers });
-        etiketHtml = r3.data?.Payload?.[0]?.ShipmentItemLabel;
-      } catch (e) { console.log("Yontem 3 basarisiz"); }
-    }
+    // Eğer buralara kadar geldiyse etiket YOK demektir. 
+    // Kolay Gelsin'in API'sinin tam olarak ne hata mesajı verdiğini ekrana gönderiyoruz:
+    const apiMesaji = data?.Message || JSON.stringify(data).substring(0, 150);
+    return res.json({ hata: `API Reddetti: ${apiMesaji}` });
 
-    if (!etiketHtml) {
-      throw new Error("Kolay Gelsin bu kargo için henüz bir etiket oluşturmamış veya silmiş olabilir.");
-    }
-
-    res.json({ etiket: etiketHtml });
   } catch (e) {
     console.error("Barkod hatasi:", e.message);
-    res.json({ hata: e.message }); 
+    res.json({ hata: "Sistem Hatası: " + e.message }); 
   }
 });
 
