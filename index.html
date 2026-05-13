@@ -235,4 +235,161 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>İNDİR
         </button>
         <a class="barkod-wa" id="barkodWa" href="#" target="_blank">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>WHATSAPP
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function tema(t){
+  document.documentElement.setAttribute("data-theme",t);
+  localStorage.setItem("tema",t);
+  document.querySelectorAll(".tdot").forEach(b=>b.classList.remove("active"));
+  const d=document.querySelector(".tdot."+t);
+  if(d)d.classList.add("active");
+  document.getElementById("tdrop").classList.remove("show");
+}
+tema(localStorage.getItem("tema")||"dark");
+
+function tdrop(){document.getElementById("tdrop").classList.toggle("show");}
+document.addEventListener("click",function(e){
+  if(!e.target.closest("#tpicker"))document.getElementById("tdrop").classList.remove("show");
+});
+
+const GK="sorgu_gecmis",GZK="sorgu_gecmis_zaman",GS=3*60*60*1000;
+function gal(){
+  const z=parseInt(localStorage.getItem(GZK)||"0");
+  if(z&&Date.now()-z>GS){localStorage.removeItem(GK);localStorage.setItem(GZK,Date.now().toString());return[];}
+  try{return JSON.parse(localStorage.getItem(GK)||"[]");}catch(e){return[];}
+}
+function gekle(no,ad){
+  let l=gal();l=l.filter(g=>g.no!==no);l.unshift({no,ad});
+  if(l.length>50)l=l.slice(0,50);
+  localStorage.setItem(GK,JSON.stringify(l));
+  if(!localStorage.getItem(GZK))localStorage.setItem(GZK,Date.now().toString());
+}
+function gguncelle(){
+  const l=gal(),el=document.getElementById("gliste");
+  if(!l.length){el.innerHTML='<div class="gbos">Henüz sorgu yapılmadı</div>';return;}
+  el.innerHTML=l.map(g=>`<div class="gitem" onclick="gsec('${g.no}')"><span class="gno">${g.no}</span><span class="gad">${g.ad||""}</span></div>`).join("");
+}
+function gsec(no){document.getElementById("no").value=no;document.getElementById("gpanel").classList.remove("show");sorgula();}
+function gtoggle(){
+  const p=document.getElementById("gpanel");
+  if(p.classList.contains("show")){p.classList.remove("show");}else{gguncelle();p.classList.add("show");}
+}
+function gsayac(){
+  const z=parseInt(localStorage.getItem(GZK)||"0");
+  if(!z){document.getElementById("gtimer").textContent="";return;}
+  const k=GS-(Date.now()-z);
+  if(k<=0){localStorage.removeItem(GK);localStorage.setItem(GZK,Date.now().toString());document.getElementById("gtimer").textContent="Sıfırlandı";gguncelle();return;}
+  const s=Math.floor(k/3600000),d=Math.floor((k%3600000)/60000),sn=Math.floor((k%60000)/1000);
+  document.getElementById("gtimer").textContent=`${s}:${String(d).padStart(2,"0")}:${String(sn).padStart(2,"0")}`;
+}
+setInterval(gsayac,1000);gsayac();
+
+document.getElementById("no").addEventListener("keydown",e=>{if(e.key==="Enter")sorgula();});
+document.getElementById("no").addEventListener("input",function(){
+  if(!this.value){
+    document.getElementById("hdr").classList.remove("compact");
+    document.getElementById("wrap").classList.remove("compact");
+    document.getElementById("result").classList.remove("show");
+    document.getElementById("err").classList.remove("show");
+  }
+});
+
+async function yapistir(){
+  try{
+    const t=await navigator.clipboard.readText();
+    const c=t.trim().replace(/[^a-zA-Z0-9]/g,"");
+    if(c){document.getElementById("no").value=c;sorgula();}
+  }catch(e){document.getElementById("no").focus();}
+}
+
+function kopyala(){
+  const tel=document.getElementById("pnum").textContent;
+  if(!tel)return;
+  navigator.clipboard.writeText(tel.slice(-4)).then(()=>{
+    const b=document.getElementById("cbtn"),l=document.getElementById("clbl");
+    b.classList.add("copied");l.textContent="✓";
+    setTimeout(()=>{b.classList.remove("copied");l.textContent="SON 4";},2000);
+  });
+}
+
+// Barkod Ekstra Fonksiyonları
+function barkodToggle() {
+  const panel = document.getElementById("barkodPanel");
+  if (panel.classList.contains("show")) {
+    panel.classList.remove("show");
+  } else {
+    panel.classList.add("show");
+    document.getElementById("barkodIcerik").classList.add("show");
+    document.getElementById("barkodActs").style.display = "flex";
+  }
+}
+
+function barkodKapat() {
+  document.getElementById("barkodPanel").classList.remove("show");
+}
+
+function barkodIndir() {
+  alert("Etiket indirme başlatılıyor...");
+}
+
+async function sorgula(){
+  const no=document.getElementById("no").value.trim().replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
+  if(!no||no.length<6){hata("Gecerli bir numara girin.");return;}
+  document.getElementById("gpanel").classList.remove("show");
+  document.getElementById("result").classList.remove("show");
+  document.getElementById("err").classList.remove("show");
+  document.getElementById("loading").classList.add("show");
+  document.getElementById("sbtn").disabled=true;
+  
+  // Barkod paneli ve butonunu başlangıçta gizle
+  document.getElementById("barkodBtn").style.display = "none";
+  document.getElementById("barkodPanel").classList.remove("show");
+
+  try{
+    const r=await fetch("/sorgula",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({gonderiNo:no})});
+    const d=await r.json();
+    if(d.hata){hata(d.hata);return;}
+    document.getElementById("rno").textContent=no;
+    document.getElementById("rad").textContent=d.adSoyad||"Bulunamadi";
+    document.getElementById("radr").textContent=d.adres||"Bulunamadi";
+    const wb=document.getElementById("warnbox");
+    if(d.adresDegisiklik){
+      document.getElementById("warntext").textContent=d.adresDegisiklik;
+      wb.classList.add("show");
+    }else{
+      wb.classList.remove("show");
+    }
+    const tel=d.telefon||"";
+    document.getElementById("pnum").textContent=tel;
+    document.getElementById("p4").textContent=tel.length>=4?"Son 4: "+tel.slice(-4):"";
+    const cb=document.getElementById("callbtn");
+    if(tel){cb.href="tel:"+tel;cb.style.display="flex";}else{cb.style.display="none";}
+    document.getElementById("hdr").classList.add("compact");
+    document.getElementById("wrap").classList.add("compact");
+    document.getElementById("result").classList.add("show");
+    
+    // İşlem başarılıysa barkod butonunu aktif et
+    document.getElementById("barkodBtn").style.display = "flex";
+    
+    gekle(no,d.adSoyad||"");
+  }catch(e){hata("Sunucu hatasi, tekrar deneyin.");}
+  finally{document.getElementById("loading").classList.remove("show");document.getElementById("sbtn").disabled=false;}
+}
+
+function hata(m){
+  document.getElementById("loading").classList.remove("show");
+  document.getElementById("sbtn").disabled=false;
+  const e=document.getElementById("err");
+  e.textContent=m;e.classList.add("show");
+}
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
+</script>
+</body>
+</html>
