@@ -62,7 +62,6 @@ async function gonderiGetir(gonderiNo) {
   const adSoyad = shipment.RecipientName || "";
   const shipmentId = shipment.ShipmentId;
 
-  // Detay - telefon ve adres
   const r3 = await axios.post(API_BASE + "/GetShipmentById", { ShipmentId: shipmentId }, { headers });
   const detay = r3.data?.Payload;
   const gsm = detay?.Recipient?.Gsm || "";
@@ -75,18 +74,17 @@ async function gonderiGetir(gonderiNo) {
   const il = detay?.Recipient?.Address?.CityName || "";
   const adres = [adresText, ilce, il].filter(Boolean).join(" / ");
 
-  // Adres değişikliği kontrolü
+  const shipmentItemId = detay?.ShipmentItemList?.[0]?.ShipmentItemId;
+
   let adresDegisiklik = null;
   try {
     const r4 = await axios.post(API_BASE + "/GetShipmentEvents", { ShipmentId: shipmentId }, { headers });
     const events = r4.data?.Payload || [];
     const adresEvent = events.find(e => e.CargoEventType === 27);
     if (adresEvent) adresDegisiklik = adresEvent.Description;
-  } catch (e) {
-    console.log("Events alinamadi:", e.message);
-  }
+  } catch (e) { console.log("Events alinamadi:", e.message); }
 
-  return { adSoyad, telefon, adres, adresDegisiklik };
+  return { adSoyad, telefon, adres, adresDegisiklik, shipmentItemId };
 }
 
 const cache = {};
@@ -100,17 +98,13 @@ setInterval(() => {
 }, 3600000);
 
 app.get("/ping", (req, res) => res.send("ok"));
-
-app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
-});
+app.get("/", (req, res) => res.sendFile(__dirname + "/index.html"));
 
 app.post("/sorgula", async (req, res) => {
   const gonderiNo = req.body?.gonderiNo;
   if (!gonderiNo) return res.json({ hata: "Gonderi no eksik" });
   const key = gonderiNo.toUpperCase();
   if (cache[key] && (Date.now() - cache[key].zaman) < 3600000) {
-    console.log("Cache'den geldi:", key);
     return res.json(cache[key].data);
   }
   try {
@@ -121,6 +115,31 @@ app.post("/sorgula", async (req, res) => {
   } catch (e) {
     console.error("Hata:", e.message);
     res.json({ hata: "Sorgu basarisiz: " + e.message });
+  }
+});
+
+app.post("/barkod", async (req, res) => {
+  const { shipmentItemId } = req.body;
+  if (!shipmentItemId) return res.json({ hata: "ShipmentItemId eksik" });
+  try {
+    await tokenKontrol();
+    if (!token) throw new Error("Token alinamadi");
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": "bearer " + token,
+      "origin": "https://kurumsal.kolaygelsin.com",
+    };
+    const r = await axios.post(API_BASE + "/GETSHIPMENTITEMLABELWITHPRINTTYPE", {
+      Barcode: shipmentItemId,
+      BarcodePrintType: 1,
+      IsReturnBarcode: false
+    }, { headers });
+    const etiketHtml = r.data?.Payload?.[0]?.ShipmentItemLabel;
+    if (!etiketHtml) throw new Error("Etiket bulunamadi");
+    res.json({ etiket: etiketHtml });
+  } catch (e) {
+    console.error("Barkod hatasi:", e.message);
+    res.json({ hata: "Barkod alinamadi: " + e.message });
   }
 });
 
