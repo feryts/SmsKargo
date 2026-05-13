@@ -121,6 +121,7 @@ app.post("/sorgula", async (req, res) => {
 app.post("/barkod", async (req, res) => {
   const { shipmentItemId } = req.body;
   if (!shipmentItemId) return res.json({ hata: "ShipmentItemId eksik" });
+  
   try {
     await tokenKontrol();
     if (!token) throw new Error("Token alinamadi");
@@ -129,17 +130,49 @@ app.post("/barkod", async (req, res) => {
       "Authorization": "bearer " + token,
       "origin": "https://kurumsal.kolaygelsin.com",
     };
-    const r = await axios.post(API_BASE + "/GETSHIPMENTITEMLABELWITHPRINTTYPE", {
-      Barcode: shipmentItemId,
-      BarcodePrintType: 1,
-      IsReturnBarcode: false
-    }, { headers });
-    const etiketHtml = r.data?.Payload?.[0]?.ShipmentItemLabel;
-    if (!etiketHtml) throw new Error("Etiket bulunamadi");
+
+    let etiketHtml = null;
+
+    // Yöntem 1: Orijinal deneme (PrintType: 1)
+    try {
+      const r1 = await axios.post(API_BASE + "/GETSHIPMENTITEMLABELWITHPRINTTYPE", {
+        Barcode: shipmentItemId,
+        BarcodePrintType: 1,
+        IsReturnBarcode: false
+      }, { headers });
+      etiketHtml = r1.data?.Payload?.[0]?.ShipmentItemLabel;
+    } catch (e) { console.log("Yontem 1 basarisiz"); }
+
+    // Yöntem 2: PrintType: 0 (Bazen 1 hata verir, 0 düz HTML döner)
+    if (!etiketHtml) {
+      try {
+        const r2 = await axios.post(API_BASE + "/GETSHIPMENTITEMLABELWITHPRINTTYPE", {
+          Barcode: shipmentItemId,
+          BarcodePrintType: 0,
+          IsReturnBarcode: false
+        }, { headers });
+        etiketHtml = r2.data?.Payload?.[0]?.ShipmentItemLabel;
+      } catch (e) { console.log("Yontem 2 basarisiz"); }
+    }
+
+    // Yöntem 3: PrintType parametresi olmadan direkt düz etiket isteme
+    if (!etiketHtml) {
+      try {
+        const r3 = await axios.post(API_BASE + "/GetShipmentItemLabel", {
+          Barcode: shipmentItemId
+        }, { headers });
+        etiketHtml = r3.data?.Payload?.[0]?.ShipmentItemLabel;
+      } catch (e) { console.log("Yontem 3 basarisiz"); }
+    }
+
+    if (!etiketHtml) {
+      throw new Error("Kolay Gelsin bu kargo için henüz bir etiket oluşturmamış veya silmiş olabilir.");
+    }
+
     res.json({ etiket: etiketHtml });
   } catch (e) {
     console.error("Barkod hatasi:", e.message);
-    res.json({ hata: "Barkod alinamadi: " + e.message });
+    res.json({ hata: e.message }); 
   }
 });
 
