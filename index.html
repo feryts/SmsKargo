@@ -90,10 +90,25 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 .rval.name{font-size:20px;font-weight:700}
 .rval.adres{font-size:14px;font-weight:500;color:var(--adres);line-height:1.6}
 
-.warn-box{display:none;margin-top:8px;background:rgba(255,140,66,.08);border:1px solid rgba(255,140,66,.3);border-radius:10px;padding:10px 12px}
-.warn-box.show{display:block}
-.warn-title{font-size:9px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:1.5px;font-family:'DM Mono',monospace;margin-bottom:5px;display:flex;align-items:center;gap:4px}
-.warn-text{font-size:12px;color:var(--warn);line-height:1.5;opacity:.9}
+/* ADRES DEĞİŞİKLİĞİ UYARI KUTUSU (İstenilen görünüme göre güncellendi) */
+.warn-box {
+  display: none;
+  margin-top: 8px;
+  background: var(--err-bg); /* Resim 2'ye göre arka plan */
+  border: 1px solid var(--err-border); /* Resim 2'ye göre kenarlık */
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.warn-box.show { display: block; }
+
+/* .warn-title kaldırıldı, artık JS statik mesaj basacak */
+
+.warn-text {
+  font-size: 12px;
+  color: var(--err-text); /* Resim 2'ye göre metin rengi */
+  line-height: 1.5;
+  opacity: 1; /* Opaklığı artır, resim 2'de daha net */
+}
 
 .prow{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .pinfo{display:flex;flex-direction:column;gap:3px;min-width:0}
@@ -189,10 +204,6 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
       <div class="rlabel">Adres</div>
       <div class="rval adres" id="radr"></div>
       <div class="warn-box" id="warnbox">
-        <div class="warn-title">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-          Adres Degisikligi
-        </div>
         <div class="warn-text" id="warntext"></div>
       </div>
     </div>
@@ -405,7 +416,8 @@ async function sorgula(){
     
     const wb=document.getElementById("warnbox");
     if(d.adresDegisiklik){
-      document.getElementById("warntext").textContent=d.adresDegisiklik;
+      // Buradaki statik mesajı kullan (Resim 2'ye göre)
+      document.getElementById("warntext").textContent = "ÖNEMLİ: Bu gönderi için alıcı tarafından adres değişikliği talebi oluşturulmuştur.";
       wb.classList.add("show");
     }else{
       wb.classList.remove("show");
@@ -425,7 +437,7 @@ async function sorgula(){
       currentShipmentItemId = d.shipmentItemId;
       document.getElementById("barkodBtn").style.display = "flex";
     }
-
+    
     gekle(no,d.adSoyad||"");
   }catch(e){hata("Sunucu hatasi, tekrar deneyin.");}
   finally{document.getElementById("loading").classList.remove("show");document.getElementById("sbtn").disabled=false;}
