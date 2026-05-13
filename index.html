@@ -217,6 +217,7 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
         </div>
       </div>
     </div>
+    
     <button class="barkod-btn" id="barkodBtn" onclick="barkodToggle()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 4h2v16H2zm3 0h1v16H5zm2 0h2v16H7zm3 0h1v16h-1zm2 0h2v16h-2zm3 0h1v16h-1zm2 0h1v16h-1zm2 0h2v16h-2z"/></svg>
       ETİKET GÖSTER
@@ -243,6 +244,8 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 </div>
 
 <script>
+let currentShipmentItemId = null; // Etiket ID'sini hafızada tutmak için
+
 function tema(t){
   document.documentElement.setAttribute("data-theme",t);
   localStorage.setItem("tema",t);
@@ -318,15 +321,41 @@ function kopyala(){
   });
 }
 
-// Barkod Ekstra Fonksiyonları
-function barkodToggle() {
+async function barkodToggle() {
   const panel = document.getElementById("barkodPanel");
+  const iframe = document.getElementById("barkodFrame");
+  const loading = document.getElementById("barkodLoading");
+  
   if (panel.classList.contains("show")) {
     panel.classList.remove("show");
   } else {
     panel.classList.add("show");
     document.getElementById("barkodIcerik").classList.add("show");
     document.getElementById("barkodActs").style.display = "flex";
+    
+    if (currentShipmentItemId && !iframe.srcdoc) {
+      loading.classList.add("show");
+      iframe.style.display = "none";
+      try {
+        const res = await fetch("/barkod", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ shipmentItemId: currentShipmentItemId })
+        });
+        const data = await res.json();
+        
+        if (data.hata) {
+          hata("Etiket hatası: " + data.hata);
+        } else if (data.etiket) {
+          iframe.srcdoc = data.etiket; 
+        }
+      } catch (e) {
+        hata("Etiket yüklenirken sunucu hatası.");
+      } finally {
+        loading.classList.remove("show");
+        iframe.style.display = "block";
+      }
+    }
   }
 }
 
@@ -335,29 +364,33 @@ function barkodKapat() {
 }
 
 function barkodIndir() {
-  alert("Etiket indirme başlatılıyor...");
+  alert("Etiket indirme özelliği, gelen etiketin yapısına göre yapılandırılabilir.");
 }
 
 async function sorgula(){
   const no=document.getElementById("no").value.trim().replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
   if(!no||no.length<6){hata("Gecerli bir numara girin.");return;}
+  
   document.getElementById("gpanel").classList.remove("show");
   document.getElementById("result").classList.remove("show");
   document.getElementById("err").classList.remove("show");
   document.getElementById("loading").classList.add("show");
   document.getElementById("sbtn").disabled=true;
   
-  // Barkod paneli ve butonunu başlangıçta gizle
   document.getElementById("barkodBtn").style.display = "none";
   document.getElementById("barkodPanel").classList.remove("show");
+  document.getElementById("barkodFrame").srcdoc = ""; 
+  currentShipmentItemId = null; 
 
   try{
     const r=await fetch("/sorgula",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({gonderiNo:no})});
     const d=await r.json();
     if(d.hata){hata(d.hata);return;}
+    
     document.getElementById("rno").textContent=no;
     document.getElementById("rad").textContent=d.adSoyad||"Bulunamadi";
     document.getElementById("radr").textContent=d.adres||"Bulunamadi";
+    
     const wb=document.getElementById("warnbox");
     if(d.adresDegisiklik){
       document.getElementById("warntext").textContent=d.adresDegisiklik;
@@ -365,17 +398,21 @@ async function sorgula(){
     }else{
       wb.classList.remove("show");
     }
+    
     const tel=d.telefon||"";
     document.getElementById("pnum").textContent=tel;
     document.getElementById("p4").textContent=tel.length>=4?"Son 4: "+tel.slice(-4):"";
     const cb=document.getElementById("callbtn");
     if(tel){cb.href="tel:"+tel;cb.style.display="flex";}else{cb.style.display="none";}
+    
     document.getElementById("hdr").classList.add("compact");
     document.getElementById("wrap").classList.add("compact");
     document.getElementById("result").classList.add("show");
     
-    // İşlem başarılıysa barkod butonunu aktif et
-    document.getElementById("barkodBtn").style.display = "flex";
+    if(d.shipmentItemId) {
+      currentShipmentItemId = d.shipmentItemId;
+      document.getElementById("barkodBtn").style.display = "flex";
+    }
     
     gekle(no,d.adSoyad||"");
   }catch(e){hata("Sunucu hatasi, tekrar deneyin.");}
