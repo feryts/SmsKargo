@@ -5,8 +5,8 @@ const app = express();
 app.use(express.json());
 app.use(express.static(__dirname));
 
-const KOLAYGELSIN_KULLANICI = "seyhanbs";
-const KOLAYGELSIN_SIFRE = "153759";
+const KOLAYGELSIN_KULLANICI = "imamoglubs";
+const KOLAYGELSIN_SIFRE = "A.1234";
 const API_BASE = "https://api.kolaygelsin.com/api/request";
 
 let token = null;
