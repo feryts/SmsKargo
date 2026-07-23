@@ -143,9 +143,28 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 @keyframes spin{to{transform:rotate(360deg)}}
 .err{display:none;background:var(--err-bg);border:1px solid var(--err-border);border-radius:12px;padding:12px 16px;color:var(--err-text);font-size:13px;text-align:center}
 .err.show{display:block}
+
+.tasindi-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:300;align-items:center;justify-content:center;padding:24px}
+.tasindi-modal.show{display:flex}
+.tasindi-box{background:var(--card);border-radius:18px;padding:24px 20px;width:100%;max-width:360px;border:1.5px solid var(--accent);box-shadow:0 8px 32px var(--shadow);text-align:center}
+.tasindi-ikon{font-size:32px;margin-bottom:10px}
+.tasindi-baslik{font-size:16px;font-weight:800;color:var(--text);font-family:'Outfit',sans-serif;margin-bottom:8px}
+.tasindi-metin{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:18px}
+.tasindi-link{display:block;background:var(--accent);color:#fff;text-decoration:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;font-family:'Outfit',sans-serif;margin-bottom:10px}
+.tasindi-link:active{background:var(--accent2)}
+.tasindi-devam{background:none;border:none;color:var(--text2);font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;text-decoration:underline}
 </style>
 </head>
 <body>
+<div class="tasindi-modal" id="tasindiModal">
+  <div class="tasindi-box">
+    <div class="tasindi-ikon">🔔</div>
+    <div class="tasindi-baslik">Link Güncellendi</div>
+    <div class="tasindi-metin">Bu adres artık kullanılmıyor. Lütfen yeni adrese geçin ve favorilerinizi güncelleyin.</div>
+    <a class="tasindi-link" href="https://kolaygelsinpanel.vercel.app/">Yeni Siteye Git</a>
+    <button class="tasindi-devam" onclick="document.getElementById('tasindiModal').classList.remove('show')">Bu sürümde devam et</button>
+  </div>
+</div>
 <img class="bg-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Kolay_Gelsin_logo.png/800px-Kolay_Gelsin_logo.png" alt="" onerror="this.style.display='none'">
 
 <div class="tbar">
@@ -268,6 +287,8 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 </div>
 
 <script>
+document.getElementById("tasindiModal").classList.add("show");
+
 let currentShipmentItemId = null; 
 
 function tema(t){
