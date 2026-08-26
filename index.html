@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-title" content="Sorgula">
 <link rel="manifest" href="/manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@zxing/library@0.20.0"></script>
 <title>Kolay Gelsin</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -25,7 +26,7 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-
 
 .bg-logo{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90vw;max-width:500px;opacity:var(--logo-op);pointer-events:none;z-index:0}
 
-.tbar{position:fixed;top:16px;right:16px;z-index:100}
+.tbar{position:fixed;top:16px;right:16px;z-index:100;display:flex;align-items:center;gap:8px}
 .tpicker{position:relative}
 .tacik{width:38px;height:38px;border-radius:50%;border:2px solid var(--accent);background:var(--btn-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 2px 12px var(--shadow)}
 .tacik:active{transform:scale(.9)}
@@ -144,30 +145,85 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 .err{display:none;background:var(--err-bg);border:1px solid var(--err-border);border-radius:12px;padding:12px 16px;color:var(--err-text);font-size:13px;text-align:center}
 .err.show{display:block}
 
-.tasindi-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:300;align-items:center;justify-content:center;padding:24px}
-.tasindi-modal.show{display:flex}
-.tasindi-box{background:var(--card);border-radius:18px;padding:24px 20px;width:100%;max-width:360px;border:1.5px solid var(--accent);box-shadow:0 8px 32px var(--shadow);text-align:center}
-.tasindi-ikon{font-size:32px;margin-bottom:10px}
-.tasindi-baslik{font-size:16px;font-weight:800;color:var(--text);font-family:'Outfit',sans-serif;margin-bottom:8px}
-.tasindi-metin{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:18px}
-.tasindi-link{display:block;background:var(--accent);color:#fff;text-decoration:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;font-family:'Outfit',sans-serif;margin-bottom:10px}
-.tasindi-link:active{background:var(--accent2)}
-.tasindi-devam{background:none;border:none;color:var(--text2);font-size:12px;font-family:'Outfit',sans-serif;cursor:pointer;text-decoration:underline}
+.tarama-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:center;justify-content:center;padding:20px}
+.tarama-modal.show{display:flex}
+.tarama-box{background:var(--card);border-radius:18px;padding:16px;width:100%;max-width:380px;border:1px solid var(--border);box-shadow:0 8px 32px var(--shadow)}
+.tarama-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.tarama-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:2px;font-family:'DM Mono',monospace}
+.tarama-kapat{background:none;border:none;color:var(--text2);cursor:pointer;font-size:22px;line-height:1;padding:0}
+.tarama-video{width:100%;border-radius:10px;background:#000;max-height:320px;object-fit:cover;display:block}
+.tarama-hint{font-size:11px;color:var(--text2);text-align:center;margin-top:8px}
+.tarama-altrow{display:flex;align-items:center;gap:10px;margin-top:8px}
+.tarama-altrow .tarama-hint{margin-top:0;flex:1}
+.fener-btn{flex-shrink:0;display:flex;align-items:center;gap:5px;background:var(--btn-bg);border:1.5px solid var(--border);border-radius:10px;padding:7px 10px;color:var(--text2);font-size:11px;font-weight:700;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s}
+.fener-btn.aktif{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tarama-err{display:none;color:var(--err-text);font-size:12px;text-align:center;margin-top:8px;background:var(--err-bg);border:1px solid var(--err-border);border-radius:8px;padding:8px}
+
+.bilgi-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;align-items:center;justify-content:center;padding:20px}
+.bilgi-modal.show{display:flex}
+.bilgi-box{background:var(--card);border-radius:18px;padding:16px;width:100%;max-width:400px;max-height:82vh;overflow-y:auto;border:1px solid var(--border);box-shadow:0 8px 32px var(--shadow)}
+.bilgi-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;position:sticky;top:0;background:var(--card)}
+.bilgi-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:2px;font-family:'DM Mono',monospace}
+.bilgi-kapat{background:none;border:none;color:var(--text2);cursor:pointer;font-size:22px;line-height:1;padding:0}
+.bilgi-item{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.bilgi-item:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.bilgi-ad{font-size:13px;font-weight:700;color:var(--text);font-family:'Outfit',sans-serif;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.bilgi-aciklama{font-size:12px;color:var(--text2);line-height:1.5}
 </style>
 </head>
 <body>
-<div class="tasindi-modal" id="tasindiModal">
-  <div class="tasindi-box">
-    <div class="tasindi-ikon">🔔</div>
-    <div class="tasindi-baslik">Link Güncellendi</div>
-    <div class="tasindi-metin">Bu adres artık kullanılmıyor. Lütfen yeni adrese geçin ve favorilerinizi güncelleyin.</div>
-    <a class="tasindi-link" href="https://kolaygelsinpanel.vercel.app/">Yeni Siteye Git</a>
-    <button class="tasindi-devam" onclick="document.getElementById('tasindiModal').classList.remove('show')">Bu sürümde devam et</button>
+<style>
+#kapaliOverlay{position:fixed;inset:0;z-index:99999;background:#1a0505;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden}
+#kapaliOverlay .kutu{max-width:380px;width:100%;background:#2a0a0a;border:2px solid #e53935;border-radius:16px;padding:28px 22px;text-align:center;box-shadow:0 0 40px rgba(229,57,53,.35)}
+#kapaliOverlay .ikon{font-size:44px;margin-bottom:14px}
+#kapaliOverlay .baslik{font-family:'Outfit',sans-serif;font-size:19px;font-weight:800;color:#ff5252;margin-bottom:10px;letter-spacing:.3px}
+#kapaliOverlay .metin{font-family:'Outfit',sans-serif;font-size:14px;color:#f2c4c4;line-height:1.6}
+html,body{overflow:hidden!important}
+</style>
+<div id="kapaliOverlay">
+  <div class="kutu">
+    <div class="ikon">⛔</div>
+    <div class="baslik">Hizmet Geçici Olarak Kapatılmıştır</div>
+    <div class="metin">Bu panel yönetim tarafından iptal edilmiştir. Herhangi bir sorgulama yapılamamaktadır.</div>
+    <button id="zarBtn" onclick="zarAt()" style="margin-top:18px;background:#e53935;color:#fff;border:none;border-radius:12px;padding:13px 22px;font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;cursor:pointer;width:100%">🎲 Şansını Dene — Zar 7 Gelirse Panel Açılır</button>
+    <div id="zarAlan" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid #e5393555">
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ff8a80;letter-spacing:4px;margin-bottom:8px">ZAR</div>
+      <div id="zarYuz" style="font-size:54px;line-height:1">⚀</div>
+      <div id="zarSonuc" style="margin-top:10px;font-family:'Outfit',sans-serif;font-size:13px;color:#f2c4c4"></div>
+    </div>
   </div>
 </div>
 <img class="bg-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Kolay_Gelsin_logo.png/800px-Kolay_Gelsin_logo.png" alt="" onerror="this.style.display='none'">
+<script>
+function zarAt(){
+  const yuzler=["⚀","⚁","⚂","⚃","⚄","⚅"];
+  const btn=document.getElementById("zarBtn");
+  const alan=document.getElementById("zarAlan");
+  const yuzEl=document.getElementById("zarYuz");
+  const sonucEl=document.getElementById("zarSonuc");
+  btn.disabled=true;
+  alan.style.display="block";
+  sonucEl.textContent="";
+  let sayac=0;
+  const anim=setInterval(()=>{
+    yuzEl.textContent=yuzler[Math.floor(Math.random()*6)];
+    sayac++;
+    if(sayac>16){
+      clearInterval(anim);
+      const sonuc=Math.floor(Math.random()*6)+1;
+      yuzEl.textContent=yuzler[sonuc-1];
+      sonucEl.textContent="Attığın sayı: "+sonuc+" — 7 gelmedi, panel kapalı kalmaya devam ediyor 😄";
+      btn.disabled=false;
+      btn.textContent="🎲 Tekrar Dene";
+    }
+  },90);
+}
+</script>
 
 <div class="tbar">
+  <button class="tacik" onclick="bilgiAc()" title="Nasıl çalışır?">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
+  </button>
   <div class="tpicker" id="tpicker">
     <button class="tacik" onclick="tdrop()">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
@@ -197,6 +253,10 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 2h-4.18C14.4.84 13.3 0 12 0c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm7 18H5V4h2v3h10V4h2v16z"/></svg>
         Yapıştır
       </button>
+      <button class="pbtn" onclick="taramaBaslat()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm16 0h2v6h-6v-2h4v-4zM7 7h2v2H7V7zm0 4h2v2H7v-2zm4-4h2v2h-2V7zm4 0h2v2h-2V7zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2z"/></svg>
+        Tara
+      </button>
     </div>
     <div class="brow">
       <button class="sbtn" id="sbtn" onclick="sorgula()">SORGULA</button>
@@ -204,6 +264,63 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
         GEÇMİŞ
       </button>
+    </div>
+  </div>
+  <div class="tarama-modal" id="taramaModal">
+    <div class="tarama-box">
+      <div class="tarama-hdr">
+        <span class="tarama-title">Barkod / QR Tara</span>
+        <button class="tarama-kapat" onclick="taramaDurdur()">×</button>
+      </div>
+      <video id="taramaVideo" class="tarama-video"></video>
+      <div class="tarama-altrow">
+        <button class="fener-btn" id="fenerBtn" onclick="fenerDegistir()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+          Fener
+        </button>
+        <div class="tarama-hint">Kamerayı barkod veya QR koduna doğrultun</div>
+      </div>
+      <div class="tarama-err" id="taramaHata"></div>
+    </div>
+  </div>
+  <div class="bilgi-modal" id="bilgiModal">
+    <div class="bilgi-box">
+      <div class="bilgi-hdr">
+        <span class="bilgi-title">Nasıl Çalışır?</span>
+        <button class="bilgi-kapat" onclick="bilgiKapat()">×</button>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">📋 Yapıştır</div>
+        <div class="bilgi-aciklama">Panodaki numarayı kutuya yapıştırır ve otomatik sorgular.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">📷 Tara</div>
+        <div class="bilgi-aciklama">Kamerayı açar, barkod veya QR kodunu okuduğu an bip sesi çalar, numarayı kutuya yazar, panoya kopyalar ve otomatik sorgular — SORGULA butonuna basmana gerek yok.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">🔦 Fener</div>
+        <div class="bilgi-aciklama">Tarama ekranında karanlıkta barkod okutmayı kolaylaştırmak için kameranın fenerini açıp kapatır (desteklemeyen cihazlarda görünmez).</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">☎️ Son 4 (otomatik)</div>
+        <div class="bilgi-aciklama">Tara ile yapılan sorgu sonuçlanınca, alıcının telefon numarasının son 4 hanesi otomatik olarak panoya kopyalanır. Elle SON 4 butonuna basmana gerek kalmaz.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">🕓 Geçmiş</div>
+        <div class="bilgi-aciklama">Son yapılan sorgular listelenir ve 3 saat boyunca saklanır, sonra otomatik silinir.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">🏷️ Etiket Göster</div>
+        <div class="bilgi-aciklama">Sorgulanan gönderinin kargo etiketini görüntüler ve indirmeni sağlar.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">🎨 Tema</div>
+        <div class="bilgi-aciklama">Sağ üstteki renk simgesinden 6 farklı görünüm arasında seçim yapabilirsin, tercihin hatırlanır.</div>
+      </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">📞 Ara</div>
+        <div class="bilgi-aciklama">Telefonun arama uygulamasını numara dolu şekilde açar; son adım olarak arama tuşuna basman gerekir (tarayıcılar güvenlik nedeniyle direkt aramayı engeller).</div>
+      </div>
     </div>
   </div>
   <div class="gpanel" id="gpanel">
@@ -287,8 +404,6 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 </div>
 
 <script>
-document.getElementById("tasindiModal").classList.add("show");
-
 let currentShipmentItemId = null; 
 
 function tema(t){
@@ -339,6 +454,9 @@ function gsayac(){
 setInterval(gsayac,1000);gsayac();
 
 document.getElementById("no").addEventListener("keydown",e=>{if(e.key==="Enter")sorgula();});
+
+let otoKopyalaBekliyor=false;
+
 document.getElementById("no").addEventListener("input",function(){
   if(!this.value){
     document.getElementById("hdr").classList.remove("compact");
@@ -355,6 +473,87 @@ async function yapistir(){
     if(c){document.getElementById("no").value=c;sorgula();}
   }catch(e){document.getElementById("no").focus();}
 }
+
+let taramaOkuyucu=null;
+let fenerAcik=false;
+
+function bipSesi(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();
+    const gain=ctx.createGain();
+    osc.type="sine";
+    osc.frequency.value=880;
+    gain.gain.setValueAtTime(.2,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.15);
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.start();osc.stop(ctx.currentTime+.15);
+  }catch(e){}
+}
+
+async function fenerDegistir(){
+  const video=document.getElementById("taramaVideo");
+  const stream=video.srcObject;
+  const track=stream&&stream.getVideoTracks()[0];
+  if(!track)return;
+  const yetenekler=track.getCapabilities?track.getCapabilities():{};
+  if(!yetenekler.torch){
+    const hataEl=document.getElementById("taramaHata");
+    hataEl.textContent="Bu cihaz/tarayıcı fener kontrolünü desteklemiyor.";
+    hataEl.style.display="block";
+    return;
+  }
+  try{
+    await track.applyConstraints({advanced:[{torch:!fenerAcik}]});
+    fenerAcik=!fenerAcik;
+    document.getElementById("fenerBtn").classList.toggle("aktif",fenerAcik);
+  }catch(e){}
+}
+
+async function taramaBaslat(){
+  const modal=document.getElementById("taramaModal");
+  const hataEl=document.getElementById("taramaHata");
+  hataEl.style.display="none";
+  modal.classList.add("show");
+  try{
+    taramaOkuyucu=new ZXing.BrowserMultiFormatReader();
+    const cihazlar=await taramaOkuyucu.listVideoInputDevices();
+    if(!cihazlar.length)throw new Error("Kamera bulunamadi");
+    const arkaKamera=cihazlar.find(c=>/back|rear|arka/i.test(c.label))||cihazlar[cihazlar.length-1];
+    taramaOkuyucu.decodeFromVideoDevice(arkaKamera.deviceId,"taramaVideo",(sonuc,hata)=>{
+      if(sonuc){
+        const metin=sonuc.getText().trim().replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
+        bipSesi();
+        taramaDurdur();
+        if(metin){
+          document.getElementById("no").value=metin;
+          taramaKopyala(metin);
+          otoKopyalaBekliyor=true;
+          sorgula();
+        }
+      }
+    });
+  }catch(e){
+    hataEl.textContent="Kamera acilamadi: "+e.message;
+    hataEl.style.display="block";
+  }
+}
+
+function taramaDurdur(){
+  if(taramaOkuyucu){taramaOkuyucu.reset();taramaOkuyucu=null;}
+  fenerAcik=false;
+  document.getElementById("fenerBtn").classList.remove("aktif");
+  document.getElementById("taramaModal").classList.remove("show");
+}
+
+function taramaKopyala(metin){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(metin).catch(()=>{});
+  }
+}
+
+function bilgiAc(){document.getElementById("bilgiModal").classList.add("show");}
+function bilgiKapat(){document.getElementById("bilgiModal").classList.remove("show");}
 
 function kopyala(){
   const tel=document.getElementById("pnum").textContent;
@@ -430,8 +629,10 @@ function barkodIndir() {
 }
 
 async function sorgula(){
+  hata("Hizmet yönetim tarafından iptal edilmiştir. Sorgulama yapılamıyor.");
+  return;
   const no=document.getElementById("no").value.trim().replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
-  if(!no||no.length<6){hata("Gecerli bir numara girin.");return;}
+  if(!no||no.length<6){otoKopyalaBekliyor=false;hata("Gecerli bir numara girin.");return;}
   
   document.getElementById("gpanel").classList.remove("show");
   document.getElementById("result").classList.remove("show");
@@ -447,7 +648,7 @@ async function sorgula(){
   try{
     const r=await fetch("/sorgula",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({gonderiNo:no})});
     const d=await r.json();
-    if(d.hata){hata(d.hata);return;}
+    if(d.hata){otoKopyalaBekliyor=false;hata(d.hata);return;}
     
     document.getElementById("rno").textContent=no;
     document.getElementById("rad").textContent=d.adSoyad||"Bulunamadi";
@@ -508,7 +709,9 @@ async function sorgula(){
     }
     
     gekle(no,d.adSoyad||"");
-  }catch(e){hata("Sunucu hatasi, tekrar deneyin.");}
+
+    if(otoKopyalaBekliyor){otoKopyalaBekliyor=false;if(tel)kopyala();}
+  }catch(e){otoKopyalaBekliyor=false;hata("Sunucu hatasi, tekrar deneyin.");}
   finally{document.getElementById("loading").classList.remove("show");document.getElementById("sbtn").disabled=false;}
 }
 

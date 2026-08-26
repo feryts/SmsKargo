@@ -101,6 +101,7 @@ app.get("/ping", (req, res) => res.send("ok"));
 app.get("/", (req, res) => res.sendFile(__dirname + "/index.html"));
 
 app.post("/sorgula", async (req, res) => {
+  return res.json({ hata: "Hizmet yönetim tarafından iptal edilmiştir." });
   const gonderiNo = req.body?.gonderiNo;
   if (!gonderiNo) return res.json({ hata: "Gonderi no eksik" });
   const key = gonderiNo.toUpperCase();
