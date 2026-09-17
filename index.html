@@ -172,53 +172,7 @@ input::placeholder{color:var(--text2);font-size:12px;opacity:.7;font-family:'Out
 </style>
 </head>
 <body>
-<style>
-#kapaliOverlay{position:fixed;inset:0;z-index:99999;background:#1a0505;display:flex;align-items:center;justify-content:center;padding:24px;overflow:hidden}
-#kapaliOverlay .kutu{max-width:380px;width:100%;background:#2a0a0a;border:2px solid #e53935;border-radius:16px;padding:28px 22px;text-align:center;box-shadow:0 0 40px rgba(229,57,53,.35)}
-#kapaliOverlay .ikon{font-size:44px;margin-bottom:14px}
-#kapaliOverlay .baslik{font-family:'Outfit',sans-serif;font-size:19px;font-weight:800;color:#ff5252;margin-bottom:10px;letter-spacing:.3px}
-#kapaliOverlay .metin{font-family:'Outfit',sans-serif;font-size:14px;color:#f2c4c4;line-height:1.6}
-html,body{overflow:hidden!important}
-</style>
-<div id="kapaliOverlay">
-  <div class="kutu">
-    <div class="ikon">⛔</div>
-    <div class="baslik">Hizmet Geçici Olarak Kapatılmıştır</div>
-    <div class="metin">Bu panel yönetim tarafından iptal edilmiştir. Herhangi bir sorgulama yapılamamaktadır.</div>
-    <button id="zarBtn" onclick="zarAt()" style="margin-top:18px;background:#e53935;color:#fff;border:none;border-radius:12px;padding:13px 22px;font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;cursor:pointer;width:100%">🎲 Şansını Dene — Zar 7 Gelirse Panel Açılır</button>
-    <div id="zarAlan" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid #e5393555">
-      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#ff8a80;letter-spacing:4px;margin-bottom:8px">ZAR</div>
-      <div id="zarYuz" style="font-size:54px;line-height:1">⚀</div>
-      <div id="zarSonuc" style="margin-top:10px;font-family:'Outfit',sans-serif;font-size:13px;color:#f2c4c4"></div>
-    </div>
-  </div>
-</div>
 <img class="bg-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Kolay_Gelsin_logo.png/800px-Kolay_Gelsin_logo.png" alt="" onerror="this.style.display='none'">
-<script>
-function zarAt(){
-  const yuzler=["⚀","⚁","⚂","⚃","⚄","⚅"];
-  const btn=document.getElementById("zarBtn");
-  const alan=document.getElementById("zarAlan");
-  const yuzEl=document.getElementById("zarYuz");
-  const sonucEl=document.getElementById("zarSonuc");
-  btn.disabled=true;
-  alan.style.display="block";
-  sonucEl.textContent="";
-  let sayac=0;
-  const anim=setInterval(()=>{
-    yuzEl.textContent=yuzler[Math.floor(Math.random()*6)];
-    sayac++;
-    if(sayac>16){
-      clearInterval(anim);
-      const sonuc=Math.floor(Math.random()*6)+1;
-      yuzEl.textContent=yuzler[sonuc-1];
-      sonucEl.textContent="Attığın sayı: "+sonuc+" — 7 gelmedi, panel kapalı kalmaya devam ediyor 😄";
-      btn.disabled=false;
-      btn.textContent="🎲 Tekrar Dene";
-    }
-  },90);
-}
-</script>
 
 <div class="tbar">
   <button class="tacik" onclick="bilgiAc()" title="Nasıl çalışır?">
@@ -321,6 +275,10 @@ function zarAt(){
         <div class="bilgi-ad">📞 Ara</div>
         <div class="bilgi-aciklama">Telefonun arama uygulamasını numara dolu şekilde açar; son adım olarak arama tuşuna basman gerekir (tarayıcılar güvenlik nedeniyle direkt aramayı engeller).</div>
       </div>
+      <div class="bilgi-item">
+        <div class="bilgi-ad">💬 WA</div>
+        <div class="bilgi-aciklama">Alıcının WhatsApp sohbetini numarası otomatik dolu şekilde açar.</div>
+      </div>
     </div>
   </div>
   <div class="gpanel" id="gpanel">
@@ -373,6 +331,10 @@ function zarAt(){
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
             <span class="bl" id="clbl">SON 4</span>
           </button>
+          <a class="abtn" id="wabtn" href="#" target="_blank" style="border-color:rgba(37,211,102,.35);background:rgba(37,211,102,.1);color:#25d366">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m0 1.67a8.2 8.2 0 0 1 5.83 2.42 8.19 8.19 0 0 1 2.41 5.83c0 4.55-3.7 8.25-8.25 8.25a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.17 8.17 0 0 1-1.26-4.38c0-4.55 3.7-8.26 8.25-8.26M8.53 6.85c-.17 0-.45.06-.68.32-.24.25-.9.88-.9 2.15 0 1.27.92 2.5 1.05 2.67.13.17 1.79 2.87 4.43 3.91 2.2.86 2.64.69 3.12.65.48-.04 1.54-.63 1.75-1.24.22-.61.22-1.13.15-1.24-.06-.11-.24-.17-.5-.3-.26-.14-1.54-.76-1.78-.85-.24-.09-.41-.13-.59.13-.17.26-.68.85-.83 1.02-.15.17-.31.19-.57.06-.26-.13-1.09-.4-2.08-1.28-.77-.68-1.29-1.53-1.44-1.79-.15-.26-.02-.4.11-.53.12-.12.26-.31.39-.47.13-.16.17-.26.26-.44.09-.17.04-.33-.02-.46-.06-.13-.59-1.44-.81-1.96-.21-.51-.43-.44-.59-.45z"/></svg>
+            <span class="bl">WA</span>
+          </a>
           <a class="abtn" id="callbtn" href="#">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
             <span class="bl">ARA</span>
@@ -629,8 +591,6 @@ function barkodIndir() {
 }
 
 async function sorgula(){
-  hata("Hizmet yönetim tarafından iptal edilmiştir. Sorgulama yapılamıyor.");
-  return;
   const no=document.getElementById("no").value.trim().replace(/[^a-zA-Z0-9]/g,"").toUpperCase();
   if(!no||no.length<6){otoKopyalaBekliyor=false;hata("Gecerli bir numara girin.");return;}
   
@@ -698,6 +658,16 @@ async function sorgula(){
     document.getElementById("p4").textContent=tel.length>=4?"Son 4: "+tel.slice(-4):"";
     const cb=document.getElementById("callbtn");
     if(tel){cb.href="tel:"+tel;cb.style.display="flex";}else{cb.style.display="none";}
+    const wa=document.getElementById("wabtn");
+    if(tel){
+      let waNo=tel.replace(/\D/g,"");
+      if(waNo.startsWith("0"))waNo=waNo.slice(1);
+      if(!waNo.startsWith("90"))waNo="90"+waNo;
+      wa.href="https://wa.me/"+waNo;
+      wa.style.display="flex";
+    }else{
+      wa.style.display="none";
+    }
     
     document.getElementById("hdr").classList.add("compact");
     document.getElementById("wrap").classList.add("compact");
